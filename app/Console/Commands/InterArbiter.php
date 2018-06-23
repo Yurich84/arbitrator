@@ -76,47 +76,22 @@ class InterArbiter extends Command
 
             foreach ($triangles as $trio) {
 
-//                dd($trio);
-
-                /*
-                 * у нас есть три валюти
-                 * будемо торгувать або в одному напрямку clockwise
-                 * або в іншому anticlockwise
-                 *
-                 */
-
                 list($A, $B, $C, $A) = explode('->', $trio['symbol']);
 
                 /*
-                 * clockwise
                  * A->B->C->A
                  */
                 $price_A_B = $this->getPrice($A, $B, $trio['pairs']);
                 $price_B_C = $this->getPrice($B, $C, $trio['pairs']);
                 $price_C_A = $this->getPrice($C, $A, $trio['pairs']);
 
-                $clockwise_profit = 100 * $price_A_B * $price_B_C * $price_C_A * $tax - 100;
+                $profit = 100 * $price_A_B * $price_B_C * $price_C_A * $tax - 100;
 
-                /*
-                 * anticlockwise
-                 * A->C->B->A
-                 */
-                $price_A_C = $this->getPrice($A, $C, $trio['pairs']);
-                $price_C_B = $this->getPrice($C, $B, $trio['pairs']);
-                $price_B_A = $this->getPrice($B, $A, $trio['pairs']);
+                if($profit > 0) { // у нас позитивний профіт
 
-                $anticlockwise_profit = 100 * $price_A_C * $price_C_B * $price_B_A * $tax - 100;
-
-                $profit = max($clockwise_profit, $anticlockwise_profit);
-
-                if($profit > 0) {
-                    // у нас позитивний профіт
 //                    $this->info($trio['symbol'] . ' - ' . $profit . ' %');
 
-                    // найти минимум на которий модно торговать
-
-                    // записать в базу последовательность, время, минимум, дополнительную инфо в json
-
+                    // записать в базу
                     \DB::table('triangle_forks')
                         ->insert([
                             'exchange_id' => $exchange_mod->id,

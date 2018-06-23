@@ -28,6 +28,7 @@
         <div class="app-title">
             <div>
                 <h1>@yield('name')</h1>
+                <p>@yield('desc')</p>
             </div>
             @include('breadcrumbs')
         </div>

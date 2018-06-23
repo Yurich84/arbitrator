@@ -25,12 +25,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('arb:inter cryptopia')
-                  ->everyThirtyMinutes();
+//         $schedule->command('arb:inter cryptopia')
+//                  ->everyThirtyMinutes();
 
         $schedule->command('arb:inter kucoin')
-            ->everyTenMinutes();
+            ->everyFiveMinutes();
 
+        $schedule->command('arb:inter bittrex')
+            ->everyFiveMinutes();
 
         $schedule->command('arb:inter exmo')
             ->everyTenMinutes();

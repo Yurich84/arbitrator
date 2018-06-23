@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
+use App\Models\Exchange;
 
-class DashboardC extends Controller
+class ExchangeC extends Controller
 {
 
     /**
@@ -15,7 +16,7 @@ class DashboardC extends Controller
      */
     public function index()
     {
-        return view('admin.dashboard.index');
+        return view('admin.exchange.index', ['exchanges' => Exchange::all()]);
     }
 
 

@@ -36,9 +36,17 @@ Route::get('/tickers', function () {
 });
 
 
+
 Route::group(['namespace' => 'Admin', 'middleware' => 'admin'], function () {
 
     Route::get('/', ['uses' => 'DashboardC@index', 'as' => 'admin.dashboard']);
+
+    Route::get('/exchanges', ['uses' => 'ExchangeC@index', 'as' => 'admin.exchanges']);
+
+    Route::get('/triangle/current', ['uses' => 'TriangleC@current', 'as' => 'admin.triangle.current']);
+
+    Route::get('/triangle/logs', ['uses' => 'TriangleC@logs', 'as' => 'admin.triangle.logs']);
+    Route::get('/triangle/logs_data', ['uses' => 'TriangleC@logsData', 'as' => 'admin.triangle.logs_data']);
 
 });
 
