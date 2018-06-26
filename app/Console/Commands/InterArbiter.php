@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Console\Ar\Triangles;
-use App\Models\Exchange;
+use App\Models\Stock;
 use Carbon\Carbon;
 use ccxt\ccex;
 use Illuminate\Console\Command;
@@ -46,24 +46,22 @@ class InterArbiter extends Command
     {
         $exchange_arr = $this->argument('exchange');
 
-        $exchange_mod = Exchange::where('ccxt_id', $exchange_arr)->first();
+        $stock = Stock::where('ccxt_id', $exchange_arr)->first();
 
-        if ($exchange_mod) {
+        if ($stock) {
 
-            // план: проверить/создать блеклист
-
-            $exchange = self::$exchange_namespace . $exchange_mod->ccxt_id;
+            // берем биржу
+            $exchange = self::$exchange_namespace . $stock->ccxt_id;
             $exchange = new $exchange (['timeout' => 30000]);
 
             $default_fee = 0.002;
 
-            $fee = isset($exchange->fees['trading']['maker']) ? $exchange->describe()['fees']['trading']['maker'] : $default_fee;
+            $fee = $stock->fee ?: $default_fee;
             $tax = pow((1-$fee), 3);
 
             // перебираем пари і получаєм тройкі
             $this->info('Перебираем пари і получаєм тройкі');
-            $triangles = Triangles::find($exchange);
-
+            $triangles = Triangles::find($exchange, $stock->id);
 
             echo PHP_EOL;
             $this->info('Дивимся профіт по кожній тройці');
@@ -94,7 +92,7 @@ class InterArbiter extends Command
                     // записать в базу
                     \DB::table('triangle_forks')
                         ->insert([
-                            'exchange_id' => $exchange_mod->id,
+                            'stock_id' => $stock->id,
                             'symbol' => $trio['symbol'],
                             'profit' => $profit,
                             'created_at' => Carbon::now(),

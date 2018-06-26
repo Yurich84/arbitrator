@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
-use App\Models\Exchange;
+use App\Models\Config;
+use App\Models\Stock;
 
-class ExchangeC extends Controller
+class KeyC extends Controller
 {
 
     /**
@@ -16,7 +17,7 @@ class ExchangeC extends Controller
      */
     public function index()
     {
-        return view('admin.exchange.index', ['exchanges' => Exchange::all()]);
+        return view('admin.key.index', ['configs' => Config::all()]);
     }
 
 

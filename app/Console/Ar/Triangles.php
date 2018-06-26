@@ -2,6 +2,7 @@
 
 namespace App\Console\Ar;
 
+use App\Models\BlackList;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -17,7 +18,7 @@ class Triangles
      * @param $exchange
      * @return array
      */
-    public static function find($exchange)
+    public static function find($exchange, $stock_id)
     {
 
             $pairs = $exchange->fetch_tickers();
@@ -32,11 +33,11 @@ class Triangles
 //        include dirname(__DIR__) . "/Commands/data.php";
 //        $pairs_map = $data_pairs;
 
-        return self::getPair($pairs_map);
+        return self::getPair($pairs_map, $stock_id);
     }
 
 
-    private static function getPair($pairs_map)
+    private static function getPair($pairs_map, $stock_id)
     {
         $bar = new ProgressBar(new ConsoleOutput(), count($pairs_map));
         $bar->setFormat('debug');
@@ -51,6 +52,14 @@ class Triangles
 
             // якщо стартова валюта присутня в парі,
             if(in_array(self::START_CURRENT, [$base_curr, $quote_curr])) {
+
+                // проверить блеклист
+
+                $black_list = BlackList
+                    ::where('symbol', $base_curr . '/' . $quote_curr)
+                    ->where('stock_id', $stock_id)
+                    ->get();
+                if($black_list->count() > 0) continue;
 
                 $first_pair = [
                     'base_curr'  => $base_curr,
@@ -68,6 +77,12 @@ class Triangles
 
                     // якщо друга валюта присутня в парі,
                     if(in_array($second_curr, [$base_curr, $quote_curr]) && ! in_array(self::START_CURRENT, [$base_curr, $quote_curr]) ) {
+
+                        $black_list = BlackList
+                            ::where('symbol', $base_curr . '/' . $quote_curr)
+                            ->where('stock_id', $stock_id)
+                            ->get();
+                        if($black_list->count() > 0) continue;
 
                         $second_pair = [
                             'base_curr'  => $base_curr,
@@ -113,6 +128,8 @@ class Triangles
         }
 
         echo PHP_EOL;
+
+        $triangles = collect($triangles)->unique('symbol')->toArray();
 
         return $triangles;
     }

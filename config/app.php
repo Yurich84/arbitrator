@@ -13,7 +13,10 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Arbitrator'),
+
+
+    'timeout' => 60, // minute
 
     /*
     |--------------------------------------------------------------------------

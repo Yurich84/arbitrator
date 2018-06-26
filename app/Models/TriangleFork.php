@@ -18,9 +18,9 @@ class TriangleFork extends Model
     /**
      * Биржа
      */
-    public function exchange()
+    public function stock()
     {
-        return $this->belongsTo(Exchange::class);   //связь один ко многим
+        return $this->belongsTo(Stock::class);   //связь один ко многим
     }
 
 }

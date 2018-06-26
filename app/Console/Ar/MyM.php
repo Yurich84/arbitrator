@@ -38,16 +38,16 @@ class MyM extends My
 
     public function updateExchangesInDB()
     {
-        $exchanges = \App\Models\Exchange::all();
+        $exchanges = \App\Models\Stock::all();
 
         foreach ($exchanges as $exchange_model) {
             $exchange = $this->exchange_namespace . $exchange_model->ccxt_id;
             $exchange = new $exchange ();
 
-            DB::table('exchanges')
+            DB::table('stocks')
                 ->where('id', $exchange_model->id)
                 ->update([
-//                'fee'       => @$exchange->fees['trading']['maker'] ?: NULL,
+                'logo'       => @$exchange->urls['logo'] ?: NULL,
             ]);
         }
 
@@ -56,15 +56,12 @@ class MyM extends My
 
     public function test($id)
     {
-
-        dd(ccex::$exchanges);
-
         $exchange = $this->exchange_namespace . $id;
         $exchange = new $exchange ();
 
-        $exchange->load_markets();
+        $s = $exchange->fetchMarkets();
 
-        dd($exchange->symbols);
+        dd(collect($s)->where('active', false));
 
     }
 

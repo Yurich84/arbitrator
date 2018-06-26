@@ -10,21 +10,33 @@
             <div class="tile">
                 <div class="tile-body">
 
-                    <div data-column="1">
-                        <select type="text" class="column_filter form-control" id="col2_filter">
-                            <option value="">Выберите биржу</option>
-                            <option value="24">Bittrex</option>
-                            <option value="62">EXMO</option>
-                            <option value="85">Kucoin</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-4">
+                            <div data-column="1">
+                                <select type="text" class="column_filter form-control">
+                                    <option value="">Выберите биржу</option>
+                                    @foreach($stocks as $stock)
+                                        <option value="{{ $stock->stock_id }}">{{ $stock->stock->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <input placeholder="Поиск по тройке" type="text" name="trio" class="form-control" id="search_trio"/>
+                        </div>
+                        <div class="col-4 text-right">
+                            <button class="btn btn-outline-primary" onclick="clearFilters()">Сбросить</button>
+                        </div>
                     </div>
+
                     <br/>
+
 
 
                     <table class="table table-bordered table-striped" id="logs-table">
                         <thead>
                         <tr>
-                            <th>№</th>
+                            <th width="30">№</th>
                             <th>ex_id</th>
                             <th>Биржа</th>
                             <th>Тройка</th>
@@ -46,16 +58,36 @@
     <script src="{{ asset("js/vali/plugins/jquery.dataTables.min.js") }}"></script>
     <script src="{{ asset("js/vali/plugins/dataTables.bootstrap.min.js") }}"></script>
     <script>
+
+        function searchTrio ( value ) {
+            $('input#search_trio').val(value);
+            $('#logs-table').DataTable().draw();
+            return false;
+        }
+
+        function clearFilters () {
+            $('input#search_trio').val('');
+            $('select.column_filter').val('');
+
+            var table = $('#logs-table').DataTable();
+            table
+                .search( '' )
+                .columns().search( '' )
+                .draw();
+        }
+
+
         $(function() {
 
             function filterColumn ( i, value ) {
-                $('#logs-table').DataTable().column( i ).search(value).draw();
+                $('#logs-table').DataTable().column( i ).search(value, false, false, true).draw();
             }
+
 
             $('#logs-table').DataTable({
                 "language": {
                     search: "",
-                    searchPlaceholder: "Поиск по названию...",
+                    searchPlaceholder: "Поиск...",
                     processing:     "Загрузка...",
                     info:           "Показано _START_ - _END_ из _TOTAL_ ",
                     infoFiltered:   "(всего _MAX_ )",
@@ -73,12 +105,31 @@
                 "columnDefs": [
                     {
                         "targets": 0,
-                        "visible": true,
-                        "searchable": false,
+                        "searchable": false
                     },
                     {
                         "targets": 1,
-                        "visible": false,
+                        "visible": false
+                    },
+                    { // Биржа
+                        "targets": 2,
+                        "searchable": false,
+                        "render": function ( data, type, row ) {
+                            return '<a href="' + data.www + '" target="_blink" >' + data.name + '</a>'
+                        }
+                    },
+                    { // Тройка
+                        "targets": 3,
+                        "searchable": false,
+                        "render": function ( data, type, row ) {
+                            return '<span onclick="searchTrio(\'' + data + '\')" >' + data + '</span>'
+                        }
+                    },
+                    { // Профит
+                        "targets": 4,
+                        "render": function ( data, type, row ) {
+                            return data + ' %'
+                        }
                     },
                     {
                         "targets": [4,5],
@@ -89,19 +140,28 @@
                 processing: true,
                 serverSide: true,
 //                pageLength: 50,
-                ajax: '{!! route('admin.triangle.logs_data') !!}',
+                ajax: {
+                    url: '{{ route('admin.triangle.logs_data') }}',
+                    data: function (d) {
+                        d.trio = $('input#search_trio').val();
+                    }
+                },
                 columns: [
                     { data: 'id', name: 'id' },
-                    { data: 'exchange_id', name: 'exchange_id' },
-                    { data: 'exchange.name', name: 'exchange_name' },
+                    { data: 'stock_id', name: 'stock_id' },
+                    { data: 'stock', name: 'stock' },
                     { data: 'symbol', name: 'symbol' },
                     { data: 'profit', name: 'profit' },
-                    { data: 'created_at', name: 'created_at' },
+                    { data: 'created_at', name: 'created_at' }
                 ]
             });
 
             $('select.column_filter').on( 'change', function () {
                 filterColumn( $(this).parents('div').attr('data-column'), $(this).val() );
+            } );
+
+            $('input#search_trio').on( 'keyup', function () {
+                $('#logs-table').DataTable().draw();
             } );
         });
 

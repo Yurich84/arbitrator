@@ -18,7 +18,6 @@ class Admin
      * Create a new filter instance.
      *
      * @param  Guard  $auth
-     * @return void
      */
     public function __construct(Guard $auth)
     {
@@ -35,14 +34,9 @@ class Admin
 
     public function handle($request, Closure $next)
     {
-        if ($this->auth->guest()) {
-            if ($request->ajax()) {
-                return response('Unauthorized.', 401);
-            } else {
-                return redirect()->guest('login');
-            }
+        if (\Auth::user() &&  \Auth::user()->admin === 1) {
+            return $next($request);
         }
-
-        return $next($request);
+        abort(403, 'Доступ только для админа');
     }
 }

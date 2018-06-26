@@ -12,6 +12,7 @@
 */
 
 Auth::routes();
+Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');
 Route::get('/register', function(){
     abort(404);
 });
@@ -37,16 +38,28 @@ Route::get('/tickers', function () {
 
 
 
-Route::group(['namespace' => 'Admin', 'middleware' => 'admin'], function () {
+Route::group(['namespace' => 'Admin', 'middleware' => 'auth'], function () {
 
     Route::get('/', ['uses' => 'DashboardC@index', 'as' => 'admin.dashboard']);
 
-    Route::get('/exchanges', ['uses' => 'ExchangeC@index', 'as' => 'admin.exchanges']);
+    Route::get('/keys', ['uses' => 'KeyC@index', 'as' => 'admin.keys']);
+
 
     Route::get('/triangle/current', ['uses' => 'TriangleC@current', 'as' => 'admin.triangle.current']);
 
     Route::get('/triangle/logs', ['uses' => 'TriangleC@logs', 'as' => 'admin.triangle.logs']);
     Route::get('/triangle/logs_data', ['uses' => 'TriangleC@logsData', 'as' => 'admin.triangle.logs_data']);
+
+
+    Route::group(['middleware' => 'admin'], function () {
+        Route::get('/configs', ['uses' => 'ConfigC@index', 'as' => 'admin.config']);
+
+        Route::resource('stock', 'StockC', [
+            'only' => ['index', 'edit', 'update'],
+            'names' => 'admin.stock'
+        ]);
+
+    });
 
 });
 

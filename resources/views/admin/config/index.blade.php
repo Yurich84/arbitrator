@@ -1,6 +1,6 @@
 @extends('admin.main')
 
-@section('name', 'Биржи')
+@section('name', 'Конфигурация сайта')
 
 @section('content')
 
@@ -11,15 +11,14 @@
                     <table class="table table-bordered table-striped" id="logs-table">
                         <thead>
                         <tr>
-                            <th>№</th>
+                            <th width="30">№</th>
                             <th>Название</th>
                         </tr>
                         </thead>
 
-                        @foreach($exchanges as $exchange)
+                        @foreach($configs as $config)
                             <tr>
-                                <td>{{ $exchange->id }}</td>
-                                <td>{{ $exchange->name }}</td>
+                                <td>{{ $config->id }}</td>
                             </tr>
                         @endforeach
 
