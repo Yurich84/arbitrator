@@ -35,6 +35,17 @@
 
         <div class="container-fluid">
 
+            @if(config('bot.go'))
+                <div class="alert alert-success text-center">
+                    Бот запущен
+                </div>
+            @else
+                <div class="alert alert-danger text-center">
+                    Бот отключен
+                </div>
+            @endif
+
+
             @include('alerts')
 
             @yield('content')

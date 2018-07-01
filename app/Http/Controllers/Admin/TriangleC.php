@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Arbitrator\TriangleCalculate;
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
 use App\Models\TriangleFork;
@@ -21,7 +22,7 @@ class TriangleC extends Controller
     {
         $now = Carbon::now();
 
-        $active_stocks = Stock::latest('name')->get();
+        $active_stocks = Stock::where('active', 1)->get();
 
         $last_update_stocks = TriangleFork
             ::select(['stock_id', DB::raw('MAX(created_at) as last_time')])
@@ -38,7 +39,7 @@ class TriangleC extends Controller
             });
         }
 
-        $triangles = $tri->get()->map(function ($item) use($now) {
+        $triangles = $tri->get()->unique('symbol')->map(function ($item) use($now) {
 
             $minutes = Carbon::parse($item->created_at)->diffInMinutes($now);
 
@@ -59,30 +60,84 @@ class TriangleC extends Controller
             $item->minutes = $minutes;
             $item->color = $color;
             return $item;
-        })
-        ;
+        });
 
         return view('admin.triangle.current', compact('triangles'));
     }
 
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function logs()
     {
         $stocks = TriangleFork::with('stock')->groupBy('stock_id')->get();
         return view('admin.triangle.logs', compact('stocks'));
     }
 
+
+
     public function logsData(Request $request)
     {
         $triangles = TriangleFork::with('stock');
 
         if ($trio = $request->get('trio')) {
-            $triangles->where('symbol', 'like', "$trio"); // additional users.name search
+            $triangles->where('symbol', 'like', "$trio");
         }
 
         $triangles->get();
 
         return Datatables::of($triangles)
             ->toJson();
+    }
+
+
+    public function getTrioData($log_id)
+    {
+        $exchange_namespace = '\\ccxt\\';
+
+        $log = TriangleFork::find($log_id);
+
+        $default_fee = 0.002;
+        $fee = $log->stock->fee ?: $default_fee;
+        $tax = pow((1-$fee), 3);
+
+        $exchange = $exchange_namespace . $log->stock->ccxt_id;
+        $exchange = new $exchange();
+
+        // делаем запрос и поллучаем массив
+
+        $pairs = [];
+        foreach (json_decode($log->pairs) as $symbol) {
+
+            $orderBook = $exchange->fetch_order_book($symbol->base_curr . '/' . $symbol->quote_curr, 1);
+
+            $pairs[] = [
+                'base_curr'  => $symbol->base_curr,
+                'quote_curr' => $symbol->quote_curr,
+                'bid'        => $orderBook['bids'][0][0],
+                'ask'        => $orderBook['asks'][0][0],
+                'min_bid'    => $orderBook['bids'][0][1],
+                'min_ask'    => $orderBook['asks'][0][1]
+            ];
+
+        }
+
+        $calculate = new TriangleCalculate($log->symbol, $pairs, $tax);
+
+        $log->pairs      = json_encode($pairs);
+        $log->profit     = $calculate->profit;
+        $log->min        = $calculate->min;
+        $log->comment    = $calculate->comment;
+        $log->error      = $calculate->error;
+        $log->save();
+
+        return $log;
+
+    }
+
+    public function showTrioData($log_id)
+    {
+        return TriangleFork::find($log_id);
     }
 
 }

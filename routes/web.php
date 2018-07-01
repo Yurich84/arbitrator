@@ -18,14 +18,6 @@ Route::get('/register', function(){
 });
 
 
-Route::get('/encrypt', function () {
-    $val1 = Crypt::encrypt('K-7cc97c89aed2a2fd9ed7792d48d63f65800c447b');
-    echo $val1;
-    $val2 = Crypt::decrypt($val1);
-    echo "<br>" . $val2;
-});
-
-
 Route::get('/tickers', function () {
 
     $exchange = new ccxt\exmo (['timeout' => 30000]);
@@ -36,19 +28,30 @@ Route::get('/tickers', function () {
 
 });
 
+Route::get('/test', function () {
+
+    $rate = \App\Models\Rate::find(1321);
+
+    dd($rate->price);
+
+});
 
 
 Route::group(['namespace' => 'Admin', 'middleware' => 'auth'], function () {
 
     Route::get('/', ['uses' => 'DashboardC@index', 'as' => 'admin.dashboard']);
 
-    Route::get('/keys', ['uses' => 'KeyC@index', 'as' => 'admin.keys']);
-
+    Route::resource('key', 'KeyC', [
+        'except' => ['show'],
+        'names' => 'admin.key'
+    ]);
 
     Route::get('/triangle/current', ['uses' => 'TriangleC@current', 'as' => 'admin.triangle.current']);
 
     Route::get('/triangle/logs', ['uses' => 'TriangleC@logs', 'as' => 'admin.triangle.logs']);
     Route::get('/triangle/logs_data', ['uses' => 'TriangleC@logsData', 'as' => 'admin.triangle.logs_data']);
+    Route::get('/triangle/get_data/{id}', ['uses' => 'TriangleC@getTrioData', 'as' => 'admin.triangle.get_data']);
+    Route::get('/triangle/show_data/{id}', ['uses' => 'TriangleC@showTrioData', 'as' => 'admin.triangle.show_data']);
 
 
     Route::group(['middleware' => 'admin'], function () {

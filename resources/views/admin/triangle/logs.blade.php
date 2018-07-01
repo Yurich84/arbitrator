@@ -41,6 +41,7 @@
                             <th>Биржа</th>
                             <th>Тройка</th>
                             <th>Профит</th>
+                            <th>Мин</th>
                             <th>Время</th>
                         </tr>
                         </thead>
@@ -152,6 +153,7 @@
                     { data: 'stock', name: 'stock' },
                     { data: 'symbol', name: 'symbol' },
                     { data: 'profit', name: 'profit' },
+                    { data: 'min', name: 'min' },
                     { data: 'created_at', name: 'created_at' }
                 ]
             });

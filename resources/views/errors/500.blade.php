@@ -1,4 +1,4 @@
-@extends('front.layouts.1_column')
+@extends('layout')
 
 @section('content')
 <br/>

@@ -25,11 +25,13 @@
                             <tr @if($stock->active) style="background: lightgreen;" @endif>
                                 <td>{{ $stock->id }}</td>
                                 <td>{{ Html::image( '/imgs/stocks/' . $stock->logo) }}</td>
-                                <td><i class="fa @if($stock->favorite) fa-star @else fa-star-0 @endif " aria-hidden="true"></i>
+                                <td><i class="fa @if($stock->favorite) fa-star @else fa-star-o @endif " aria-hidden="true"></i>
                                     {{ link_to($stock->www, $stock->name, ['target' => '_blink']) }}</td>
                                 <td>{{ $stock->fee or 'n/a' }} %</td>
                                 <td>{{ $stock->timeout or 'n/a' }} мин.</td>
-                                <td>{{ $stock->comment }}</td>
+                                <td>
+                                    @if($stock->has_order_vol) * @endif
+                                    {{ $stock->comment }}</td>
                                 <td>
                                     <a href="{{ route('admin.stock.edit', ['id' => $stock->id]) }}" class="teal-text" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">
                                         <i class="fa fa-pencil"></i>

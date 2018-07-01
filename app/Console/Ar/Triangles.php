@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 class Triangles
 {
 
-    const START_CURRENT = 'BTC';
+    const START_CURRENT = 'DOGE';
 
     public static $exchange_namespace = '\\ccxt\\';
 
@@ -66,6 +66,8 @@ class Triangles
                     'quote_curr' => $quote_curr,
                     'bid'        => $pair['bid'],
                     'ask'        => $pair['ask'],
+                    'min_bid'    => 0,
+                    'min_ask'    => 0
                 ];
 
                 // то друга - це валюта з якою торгуеться стартова
@@ -89,6 +91,8 @@ class Triangles
                             'quote_curr' => $quote_curr,
                             'bid'        => $pair2['bid'],
                             'ask'        => $pair2['ask'],
+                            'min_bid'    => 0,
+                            'min_ask'    => 0
                         ];
 
                         // то третя - це валюта з якою торгуеться друга
@@ -110,12 +114,14 @@ class Triangles
                             'quote_curr' => $quote_curr,
                             'bid'        => $pair3['bid'],
                             'ask'        => $pair3['ask'],
+                            'min_bid'    => 0,
+                            'min_ask'    => 0
                         ];
 
 
                         $triangles[] = [
                             'symbol' => self::START_CURRENT.'->'.$second_curr.'->'.$third_curr.'->'.self::START_CURRENT,
-                            'pairs' => [$first_pair, $second_pair, $third_pair]
+                            'pairs'  => [$first_pair, $second_pair, $third_pair]
                         ];
 
                     }

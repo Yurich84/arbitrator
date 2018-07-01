@@ -10,6 +10,50 @@ class Key extends Model
     protected $guarded = [];
     public $timestamps = false;
 
+
+    /*----------------------------------------
+     * Mutators
+     *----------------------------------------
+     */
+    /**
+     * получаем key
+     * @param $value
+     * @return string
+     */
+    public function getKeyAttribute($value)
+    {
+        return decrypt($value);
+    }
+
+    /**
+     * сохраняем key
+     * @param $value
+     */
+    public function setKeyAttribute($value)
+    {
+        $this->attributes['key'] = encrypt($value);
+    }
+
+    /**
+     * получаем secret
+     * @param $value
+     * @return string
+     */
+    public function getSecretAttribute($value)
+    {
+        return decrypt($value);
+    }
+
+    /**
+     * сохраняем secret
+     * @param $value
+     */
+    public function setSecretAttribute($value)
+    {
+        $this->attributes['secret'] = encrypt($value);
+    }
+
+
     /*----------------------------------------
      * Relationships
      *----------------------------------------

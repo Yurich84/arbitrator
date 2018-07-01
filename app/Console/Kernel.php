@@ -30,21 +30,23 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
 
-        $active_stocks = Stock::where('active', 1)->get();
+        if(config('bot.go')) {
+            $active_stocks = Stock::where('active', 1)->get();
 
-        foreach ($active_stocks as $stock) {
-            // поиск вилок
-            $schedule->command('arb:inter ' . $stock->ccxt_id)
-                ->cron('*/' . ($stock->timeout ?: config('app.timeout')) . ' * * * *');
+            foreach ($active_stocks as $stock) {
+                // поиск вилок
+                $schedule->command('arb:trio ' . $stock->ccxt_id)
+                    ->cron('*/' . ($stock->timeout ?: config('bot.timeout')) . ' * * * *');
 
-            // Дважди в день обновляем блеклист
-            $schedule->command('arb:blacklist ' . $stock->ccxt_id)
-                ->twiceDaily(9, 16);
+                // Дважди в день обновляем блеклист
+                $schedule->command('arb:blacklist ' . $stock->ccxt_id)
+                    ->twiceDaily(9, 16);
+            }
+
+            // удаляем старие записи
+            $schedule->command('arb:clear')
+                ->hourly();
         }
-
-        // удаляем старие записи
-        $schedule->command('clear_old_triangle_forks')
-            ->hourly();
 
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Arbitrator\TriangleCalculate;
 use App\Console\Ar\Triangles;
 use App\Models\Stock;
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class InterArbiter extends Command
      *
      * @var string
      */
-    protected $signature = 'arb:inter {exchange?}';
+    protected $signature = 'arb:trio {exchange?}';
 
     /**
      * The console command description.
@@ -55,9 +56,8 @@ class InterArbiter extends Command
             $exchange = new $exchange (['timeout' => 30000]);
 
             $default_fee = 0.002;
-
             $fee = $stock->fee ?: $default_fee;
-            $tax = pow((1-$fee), 3);
+            $tax = 1-$fee;
 
             // перебираем пари і получаєм тройкі
             $this->info('Перебираем пари і получаєм тройкі');
@@ -74,18 +74,9 @@ class InterArbiter extends Command
 
             foreach ($triangles as $trio) {
 
-                list($A, $B, $C, $A) = explode('->', $trio['symbol']);
+                $calculate = new TriangleCalculate($trio['symbol'], $trio['pairs'], $tax);
 
-                /*
-                 * A->B->C->A
-                 */
-                $price_A_B = $this->getPrice($A, $B, $trio['pairs']);
-                $price_B_C = $this->getPrice($B, $C, $trio['pairs']);
-                $price_C_A = $this->getPrice($C, $A, $trio['pairs']);
-
-                $profit = 100 * $price_A_B * $price_B_C * $price_C_A * $tax - 100;
-
-                if($profit > 0) { // у нас позитивний профіт
+                if($calculate->profit > 0) { // у нас позитивний профіт
 
 //                    $this->info($trio['symbol'] . ' - ' . $profit . ' %');
 
@@ -94,7 +85,8 @@ class InterArbiter extends Command
                         ->insert([
                             'stock_id' => $stock->id,
                             'symbol' => $trio['symbol'],
-                            'profit' => $profit,
+                            'profit' => $calculate->profit,
+                            'pairs'  => json_encode($trio['pairs']),
                             'created_at' => Carbon::now(),
                         ]);
                 }
@@ -110,35 +102,6 @@ class InterArbiter extends Command
         }
 
         echo PHP_EOL;
-
-    }
-
-
-    protected function getPrice($from, $to, $pairs_arr)
-    {
-        $price = 0;
-        foreach ($pairs_arr as $pair) {
-            if ($pair['base_curr'] == $from && $pair['quote_curr'] == $to) {
-                // SELL: ми продаєм, берем bid
-                if($pair['bid'] > 0) {
-                    $price0 = $price = $pair['bid'];
-                } else {
-                    $price = 0;
-                }
-            } elseif ($pair['base_curr'] == $to && $pair['quote_curr'] == $from) {
-                // BUY: ми купуємо, берем ask
-                if($pair['ask'] > 0) {
-                    $price = 1 / $pair['ask'];
-                    $price0 = $pair['ask'];
-                } else {
-                    $price = 0;
-                }
-            }
-        }
-
-//        $this->info($from . '->' . $to . ' - ' . $price0);
-
-        return $price;
 
     }
 }

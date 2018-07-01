@@ -10,4 +10,20 @@ class Stock extends Model
     protected $guarded = [];
     public $timestamps = false;
 
+
+
+    /*----------------------------------------
+     * Relationships
+     *----------------------------------------
+     */
+
+    /**
+     * Биржа
+     */
+    public function key()
+    {
+        return $this->hasOne(Key::class)->where('user_id', \Auth::id());
+    }
+
+
 }
