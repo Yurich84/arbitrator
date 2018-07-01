@@ -126,43 +126,43 @@ Artisan::command('ticker {exchange} {symbol}', function ($exchange, $symbol) {
 /**
  * Найти все биржи где есть bidVolume
  */
-Artisan::command('has_bid', function () {
+Artisan::command('qty1', function () {
+    $ex = new \ccxt\yunbi();
+    $pairs = $ex->fetch_tickers();
+    dd($pairs);
+});
+Artisan::command('qty', function () {
 
-    $stocks = \App\Models\Stock::where('id', '>', 43)->get();
+    $stocks = \App\Models\Stock::where('id', '>', 113)->get();
 
     foreach ($stocks as $stock) {
 
         $error = null;
-        $has_order_vol = 0;
 
-        if(in_array($stock->ccxr_id, ['_1broker', '_1btcxe'])) continue;
+        if(in_array($stock->ccxt_id, ['_1broker', '_1btcxe', 'coincheck', 'allcoin', 'anxpro', 'bit2c'])) continue;
 
         $exchange = '\\ccxt\\' . $stock->ccxt_id;
         $exchange = new $exchange (['timeout' => 30000]);
 
-        echo PHP_EOL . $exchange->name;
+        echo PHP_EOL . $stock->ccxt_id;
 
         try{
-            $pair = $exchange->fetch_ticker('BTC/USDT');
+            $pairs = $exchange->fetch_tickers();
         } catch (Exception $e) {
-            try {
-                $pair = $exchange->fetch_ticker('BTC/USD');
-            } catch (Exception $e) {}
+            continue;
         }
 
-        if(@$pair['bidVolume']) {
-            $has_order_vol = 1;
-            echo ': Yes';
-        } else {
-            echo ': No';
-        }
+        $pairs = $exchange->fetch_tickers();
 
+        $count = count($pairs);
+
+        echo ' ' . $count;
 
 
         DB::table('stocks')
             ->where('id', $stock->id)
             ->update([
-                'has_order_vol' => $has_order_vol
+                'market_qty' => $count
             ]);
 
     }

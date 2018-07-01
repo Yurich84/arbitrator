@@ -55,11 +55,9 @@ class InterArbiter extends Command
             $exchange = self::$exchange_namespace . $stock->ccxt_id;
             $exchange = new $exchange (['timeout' => 30000]);
 
-            $default_fee = 0.002;
-            $fee = $stock->fee ?: $default_fee;
+            $fee = $stock->fee ?: config('bot.fee');
             $tax = 1-$fee;
 
-            // перебираем пари і получаєм тройкі
             $this->info('Перебираем пари і получаєм тройкі');
             $triangles = Triangles::find($exchange, $stock->id);
 
@@ -78,6 +76,25 @@ class InterArbiter extends Command
 
                 if($calculate->profit > 0) { // у нас позитивний профіт
 
+                    // ТУТ БУДЕМ ТОРГУВАТЬ
+
+                    $pairs = $trio['pairs'];
+                    foreach ($trio['pairs'] as $symbol) {
+
+                        $orderBook = $exchange->fetch_order_book($symbol->base_curr . '/' . $symbol->quote_curr, 1);
+
+                        $pairs[] = (object) [
+                            'base_curr'  => $symbol->base_curr,
+                            'quote_curr' => $symbol->quote_curr,
+                            'bid'        => $orderBook['bids'][0][0],
+                            'ask'        => $orderBook['asks'][0][0],
+                            'min_bid'    => $orderBook['bids'][0][1],
+                            'min_ask'    => $orderBook['asks'][0][1]
+                        ];
+                    }
+
+                    $calculate = new TriangleCalculate($trio['symbol'], $pairs, $tax);
+
 //                    $this->info($trio['symbol'] . ' - ' . $profit . ' %');
 
                     // записать в базу
@@ -86,7 +103,9 @@ class InterArbiter extends Command
                             'stock_id' => $stock->id,
                             'symbol' => $trio['symbol'],
                             'profit' => $calculate->profit,
-                            'pairs'  => json_encode($trio['pairs']),
+                            'pairs'  => json_encode($pairs),
+                            'min'    => $calculate->min,
+                            'comment'=> $calculate->comment,
                             'created_at' => Carbon::now(),
                         ]);
                 }

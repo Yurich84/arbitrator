@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 class Triangles
 {
 
-    const START_CURRENT = 'DOGE';
+    const START_CURRENT = 'BTC';
 
     public static $exchange_namespace = '\\ccxt\\';
 
@@ -37,6 +37,11 @@ class Triangles
     }
 
 
+    /**
+     * @param $pairs_map
+     * @param $stock_id
+     * @return array
+     */
     private static function getPair($pairs_map, $stock_id)
     {
         $bar = new ProgressBar(new ConsoleOutput(), count($pairs_map));
@@ -61,7 +66,7 @@ class Triangles
                     ->get();
                 if($black_list->count() > 0) continue;
 
-                $first_pair = [
+                $first_pair = (object) [
                     'base_curr'  => $base_curr,
                     'quote_curr' => $quote_curr,
                     'bid'        => $pair['bid'],
@@ -86,7 +91,7 @@ class Triangles
                             ->get();
                         if($black_list->count() > 0) continue;
 
-                        $second_pair = [
+                        $second_pair = (object) [
                             'base_curr'  => $base_curr,
                             'quote_curr' => $quote_curr,
                             'bid'        => $pair2['bid'],
@@ -109,7 +114,7 @@ class Triangles
 
                         $pair3 = collect($pairs_map)->where('symbol', $base_curr.'/'.$quote_curr)->first();
 
-                        $third_pair = [
+                        $third_pair = (object) [
                             'base_curr'  => $base_curr,
                             'quote_curr' => $quote_curr,
                             'bid'        => $pair3['bid'],

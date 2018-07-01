@@ -67,29 +67,29 @@ class TriangleCalculate
             'base_curr' => $from, 'quote_curr' => $to, 'price' => 0, 'market_price' => 0, 'direction' => null, 'min' => 0,
         ];
         foreach ($pairs_arr as $pair) {
-            if ($pair['base_curr'] == $from && $pair['quote_curr'] == $to) {
+            if ($pair->base_curr == $from && $pair->quote_curr == $to) {
                 // SELL: ми продаєм, берем bid
-                if($pair['bid'] > 0) {
+                if($pair->bid > 0) {
                     $order = (object) [
                         'base_curr'    => $from,
                         'quote_curr'   => $to,
-                        'price'        => $pair['bid'],
-                        'market_price' => $pair['bid'],
+                        'price'        => $pair->bid,
+                        'market_price' => $pair->bid,
                         'direction'    => 'sell',
-                        'min'          => $pair['min_bid'],
+                        'min'          => $pair->min_bid,
                     ];
                 }
-            } elseif ($pair['base_curr'] == $to && $pair['quote_curr'] == $from) {
+            } elseif ($pair->base_curr == $to && $pair->quote_curr == $from) {
                 // BUY: ми купуємо, берем ask
-                if($pair['ask'] > 0) {
+                if($pair->ask > 0) {
 
                     $order = (object) [
                         'base_curr'    => $to,
                         'quote_curr'   => $from,
-                        'price'        => 1 / $pair['ask'],
-                        'market_price' => $pair['ask'],
+                        'price'        => 1 / $pair->ask,
+                        'market_price' => $pair->ask,
                         'direction'    => 'buy',
-                        'min'          => $pair['min_ask'],
+                        'min'          => $pair->min_ask
                     ];
                 }
             }

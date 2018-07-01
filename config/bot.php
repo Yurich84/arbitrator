@@ -22,4 +22,7 @@ return [
     'timeout' => 60, // minute
 
 
+    'fee' => 0.002, // 0.2 %
+
+
 ];

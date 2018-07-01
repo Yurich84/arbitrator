@@ -16,6 +16,7 @@
                             <th>Название</th>
                             <th>Комиссия</th>
                             <th>Таймаут</th>
+                            <th>К-во пар</th>
                             <th>Комментарий</th>
                             <th></th>
                         </tr>
@@ -29,6 +30,7 @@
                                     {{ link_to($stock->www, $stock->name, ['target' => '_blink']) }}</td>
                                 <td>{{ $stock->fee or 'n/a' }} %</td>
                                 <td>{{ $stock->timeout or 'n/a' }} мин.</td>
+                                <td>{{ $stock->market_qty }}</td>
                                 <td>
                                     @if($stock->has_order_vol) * @endif
                                     {{ $stock->comment }}</td>

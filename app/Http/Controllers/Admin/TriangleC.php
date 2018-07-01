@@ -111,7 +111,7 @@ class TriangleC extends Controller
 
             $orderBook = $exchange->fetch_order_book($symbol->base_curr . '/' . $symbol->quote_curr, 1);
 
-            $pairs[] = [
+            $pairs[] = (object) [
                 'base_curr'  => $symbol->base_curr,
                 'quote_curr' => $symbol->quote_curr,
                 'bid'        => $orderBook['bids'][0][0],
