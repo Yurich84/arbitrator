@@ -78,7 +78,7 @@ class InterArbiter extends Command
 
                     // ТУТ БУДЕМ ТОРГУВАТЬ
 
-                    $pairs = $trio['pairs'];
+                    $pairs = [];
                     foreach ($trio['pairs'] as $symbol) {
 
                         $orderBook = $exchange->fetch_order_book($symbol->base_curr . '/' . $symbol->quote_curr, 1);
@@ -114,6 +114,8 @@ class InterArbiter extends Command
 
             }
 
+            $stock->updated_at = Carbon::now();
+            $stock->save();
 
         } else {
             $this->error('Enter correct Exchange name ');

@@ -52,4 +52,11 @@ class StockC extends Controller
     }
 
 
+    public function active($id)
+    {
+        $stock = Stock::find($id);
+        $stock->active = abs($stock->active - 1);
+        $stock->save();
+    }
+
 }

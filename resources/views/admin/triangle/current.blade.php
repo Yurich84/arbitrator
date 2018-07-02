@@ -47,6 +47,10 @@
                                        data-toggle="tooltip" data-placement="top" title="" data-original-title="Get info">
                                         <i class="fa fa-info" aria-hidden="true"></i>
                                     </a>
+                                    &nbsp;
+                                    <a href="{{ route('admin.triangle.show', ['id' => $trio->id]) }}" >
+                                        <i class="fa fa-play" aria-hidden="true"></i>
+                                    </a>
                                 </td>
 
                             </tr>

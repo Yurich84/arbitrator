@@ -99,7 +99,12 @@ class TriangleCalculate
 
     }
 
-
+    /**
+     * Получаем минимальное значение
+     * @param $order_A_B
+     * @param $order_B_C
+     * @param $order_C_A
+     */
     private function getMin($order_A_B, $order_B_C, $order_C_A)
     {
         $error = null;
@@ -127,6 +132,15 @@ class TriangleCalculate
         }
     }
 
+    /**
+     * Симуляция продаж
+     * @param $order_A_B
+     * @param $order_B_C
+     * @param $order_C_A
+     * @param $A
+     * @param $B
+     * @param $C
+     */
     private function simulateTrade($order_A_B, $order_B_C, $order_C_A, $A, $B, $C)
     {
         if(is_null($this->error)) {

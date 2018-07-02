@@ -3,7 +3,7 @@
         <label>
             {!! Form::hidden('active', 0) !!}
             {!! Form::checkbox('active', 1, null, ['id' => 'active']) !!}
-            <span class="flip-indecator" data-toggle-on="ON" data-toggle-off="OFF"></span>
+            <span class="flip-indecator" data-toggle-on="Online" data-toggle-off="Offline"></span>
         </label>
     </div>
 </div>

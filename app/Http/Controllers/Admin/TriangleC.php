@@ -75,6 +75,12 @@ class TriangleC extends Controller
     }
 
 
+    public function show($id)
+    {
+        $data = TriangleFork::find($id);
+        return view('admin.triangle.show', compact('data'));
+    }
+
 
     public function logsData(Request $request)
     {
@@ -91,11 +97,11 @@ class TriangleC extends Controller
     }
 
 
-    public function getTrioData($log_id)
+    public function getTrioData($id)
     {
         $exchange_namespace = '\\ccxt\\';
 
-        $log = TriangleFork::find($log_id);
+        $log = TriangleFork::find($id);
 
         $default_fee = 0.002;
         $fee = $log->stock->fee ?: $default_fee;
@@ -135,9 +141,9 @@ class TriangleC extends Controller
 
     }
 
-    public function showTrioData($log_id)
+    public function showTrioData($id)
     {
-        return TriangleFork::find($log_id);
+        return TriangleFork::find($id);
     }
 
 }
