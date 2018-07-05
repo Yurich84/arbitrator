@@ -18,7 +18,6 @@
                             <th>Таймаут</th>
                             <th>К-во пар</th>
                             <th>Комментарий</th>
-                            <th>Обновлено</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -32,7 +31,7 @@
                                 <td>
                                     <div class="toggle-flip">
                                         <label>
-                                            <input class="active_stock" type="checkbox" value="1" @if($stock->active) checked @endif />
+                                            <input class="active_stock" type="checkbox" value="1" @if($stock->inter_active) checked @endif />
                                             <span class="flip-indecator" data-toggle-on="Online" data-toggle-off="Offline"></span>
                                         </label>
                                     </div>
@@ -50,9 +49,6 @@
                                 <td>
                                     @if($stock->has_order_vol) * @endif
                                     {{ $stock->comment }}
-                                </td>
-                                <td>
-                                    {{ $stock->updated_at }}
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.stock.edit', ['id' => $stock->id]) }}" class="teal-text" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">

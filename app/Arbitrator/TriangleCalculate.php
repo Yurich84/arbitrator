@@ -7,7 +7,7 @@ use App\Models\Rate;
 class TriangleCalculate
 {
     const MY_MAX_LIMIT = 20; // USD, если больше - тогруем на єту сумму
-    const MY_MIN_LIMIT = 0; // USD, если меньше - не тогруем
+    const MY_MIN_LIMIT = 5; // USD, если меньше - не тогруем
 
     public function __construct($symbol, $pairs, $tax)
     {

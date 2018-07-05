@@ -22,7 +22,7 @@ class TriangleC extends Controller
     {
         $now = Carbon::now();
 
-        $active_stocks = Stock::where('active', 1)->get();
+        $active_stocks = Stock::where('trio_active', 1)->get();
 
         $last_update_stocks = TriangleFork
             ::select(['stock_id', DB::raw('MAX(created_at) as last_time')])

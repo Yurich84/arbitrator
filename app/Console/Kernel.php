@@ -30,13 +30,14 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
 
-        if(config('bot.go')) {
-            $active_stocks = Stock::where('active', 1)->get();
+        // запускаем бот по внутрибиржевому арбитражу
+        if(config('bot.trio.go')) {
+            $active_stocks = Stock::where('trio_active', 1)->get();
 
             foreach ($active_stocks as $stock) {
                 // поиск вилок
                 $schedule->command('arb:trio ' . $stock->ccxt_id)
-                    ->cron('*/' . ($stock->timeout ?: config('bot.timeout')) . ' * * * *');
+                    ->cron('*/' . ($stock->timeout ?: config('bot.trio.timeout')) . ' * * * *');
 
                 // Дважди в день обновляем блеклист
                 $schedule->command('arb:blacklist ' . $stock->ccxt_id)
@@ -46,6 +47,11 @@ class Kernel extends ConsoleKernel
             // удаляем старие записи
             $schedule->command('arb:clear')
                 ->hourly();
+        }
+
+        // запускаем бот по межбиржевому арбитражу
+        if(config('bot.inter.go')) {
+
         }
 
     }

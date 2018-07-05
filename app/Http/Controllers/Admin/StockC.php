@@ -17,7 +17,7 @@ class StockC extends Controller
      */
     public function index()
     {
-        $stocks = Stock::orderByDesc('active')->oldest('id')->get();
+        $stocks = Stock::orderByDesc('favorite')->oldest('id')->get();
         return view('admin.stock.index', ['stocks' => $stocks]);
     }
 
@@ -48,14 +48,14 @@ class StockC extends Controller
 
         $model->fill($request->all())->save();
 
-        return redirect()->back()->with('status', 'Успешно обновлено!');
+        return redirect()->route('admin.stock.index')->with('status', 'Успешно обновлено!');
     }
 
 
     public function active($id)
     {
         $stock = Stock::find($id);
-        $stock->active = abs($stock->active - 1);
+        $stock->inter_active = abs($stock->inter_active - 1);
         $stock->save();
     }
 

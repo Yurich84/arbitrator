@@ -35,7 +35,8 @@
 
         <div class="container-fluid">
 
-            @if(config('bot.go'))
+            @admin
+            @if(config('bot.inter.go'))
                 <div class="alert alert-success text-center">
                     Бот запущен
                 </div>
@@ -44,7 +45,7 @@
                     Бот отключен
                 </div>
             @endif
-
+            @endadmin
 
             @include('alerts')
 

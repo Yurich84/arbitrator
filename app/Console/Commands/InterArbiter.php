@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Arbitrator\TriangleCalculate;
-use App\Console\Ar\Triangles;
 use App\Models\Stock;
 use Carbon\Carbon;
 use ccxt\ccex;
@@ -18,7 +16,7 @@ class InterArbiter extends Command
      *
      * @var string
      */
-    protected $signature = 'arb:trio {exchange?}';
+    protected $signature = 'arb:inter';
 
     /**
      * The console command description.
@@ -45,82 +43,65 @@ class InterArbiter extends Command
      */
     public function handle()
     {
-        $exchange_arr = $this->argument('exchange');
 
-        $stock = Stock::where('ccxt_id', $exchange_arr)->first();
 
-        if ($stock) {
+        $stocks = Stock::where('inter_active', 1)->get();
 
-            // берем биржу
-            $exchange = self::$exchange_namespace . $stock->ccxt_id;
-            $exchange = new $exchange (['timeout' => 30000]);
+        foreach ($stocks as $stock) {
 
-            $fee = $stock->fee ?: config('bot.fee');
-            $tax = 1-$fee;
+            echo PHP_EOL . $stock->name . ' ';
 
-            $this->info('Перебираем пари і получаєм тройкі');
-            $triangles = Triangles::find($exchange, $stock->id);
+            $exchange = '\\ccxt\\' . $stock->ccxt_id;
+            $exchange = new $exchange ();
+            $exchange->enableRateLimit = true;
 
-            echo PHP_EOL;
-            $this->info('Дивимся профіт по кожній тройці');
+            // если у биржи есть публичние ключи
+            if($stock->pub_key !== null) {
+                $exchange->apiKey = $stock->pub_key;
+            }
+            if($stock->pub_key !== null) {
+                $exchange->secret = $stock->pub_secret;
+            }
+            if($stock->pub_key !== null) {
+                $exchange->uid = $stock->pub_uid;
+            }
 
-            $bar = new ProgressBar(new ConsoleOutput(), count($triangles));
-            $bar->setFormat('debug');
-            $bar->setBarCharacter('<comment>=</comment>');
-            $bar->setBarWidth(50);
-            $bar->start();
+                try {
 
-            foreach ($triangles as $trio) {
+                    $markets = \DB::table('markets')
+                        ->where('stock_id', $stock->id)
+                        ->where('active', 1)
+                        ->get(['symbol'])->pluck('symbol');
 
-                $calculate = new TriangleCalculate($trio['symbol'], $trio['pairs'], $tax);
+                    $trade_markets = \DB::table('pairs_inter')->get(['symbol'])->pluck('symbol');
 
-                if($calculate->profit > 0) { // у нас позитивний профіт
+                    // із пар вибрать ті які присутні в $pairs_inter
 
-                    // ТУТ БУДЕМ ТОРГУВАТЬ
+                    $res_markets = $markets->intersect($trade_markets->toArray());
 
-                    $pairs = [];
-                    foreach ($trio['pairs'] as $symbol) {
+                    dd($res_markets);
 
-                        $orderBook = $exchange->fetch_order_book($symbol->base_curr . '/' . $symbol->quote_curr, 1);
 
-                        $pairs[] = (object) [
-                            'base_curr'  => $symbol->base_curr,
-                            'quote_curr' => $symbol->quote_curr,
-                            'bid'        => $orderBook['bids'][0][0],
-                            'ask'        => $orderBook['asks'][0][0],
-                            'min_bid'    => $orderBook['bids'][0][1],
-                            'min_ask'    => $orderBook['asks'][0][1]
-                        ];
-                    }
-
-                    $calculate = new TriangleCalculate($trio['symbol'], $pairs, $tax);
-
-//                    $this->info($trio['symbol'] . ' - ' . $profit . ' %');
-
-                    // записать в базу
-                    \DB::table('triangle_forks')
-                        ->insert([
-                            'stock_id' => $stock->id,
-                            'symbol' => $trio['symbol'],
-                            'profit' => $calculate->profit,
-                            'pairs'  => json_encode($pairs),
-                            'min'    => $calculate->min,
-                            'comment'=> $calculate->comment,
-                            'created_at' => Carbon::now(),
-                        ]);
+                } catch (\ccxt\RequestTimeout $e) {
+                    $this->error($e->getMessage());
+                } catch (\ccxt\DDoSProtection $e) {
+                    $this->error($e->getMessage());
+                } catch (\ccxt\AuthenticationError $e) {
+                    $this->error($e->getMessage());
+                } catch (\ccxt\ExchangeNotAvailable $e) {
+                    $this->error($e->getMessage());
+                } catch (\ccxt\NotSupported $e) {
+                    $this->error($e->getMessage());
+                } catch (\ccxt\NetworkError $e) {
+                    $this->error($e->getMessage());
+                } catch (\ccxt\ExchangeError $e) {
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    $this->error($e->getMessage());
                 }
-
-                $bar->advance();
 
             }
 
-            $stock->updated_at = Carbon::now();
-            $stock->save();
-
-        } else {
-            $this->error('Enter correct Exchange name ');
-            $this->info(implode(', ', ccex::$exchanges));
-        }
 
         echo PHP_EOL;
 

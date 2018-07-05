@@ -126,45 +126,116 @@ Artisan::command('ticker {exchange} {symbol}', function ($exchange, $symbol) {
 /**
  * Найти все биржи где есть bidVolume
  */
-Artisan::command('qty1', function () {
-    $ex = new \ccxt\yunbi();
-    $pairs = $ex->fetch_tickers();
-    dd($pairs);
-});
-Artisan::command('qty', function () {
+Artisan::command('lm', function () {
+    $exchange = new \ccxt\flowbtc([
+//        'verbose' => true,
+        'proxy' => 'https://cors-anywhere.herokuapp.com/',
+        'origin' => 'foobar',
+    ]);
+    $exchange->userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15';
+    $exchange->enableRateLimit = true; // enable
 
-    $stocks = \App\Models\Stock::where('id', '>', 113)->get();
+//    dd(1);
+    $markets = $exchange->load_markets();
+
+    foreach ($markets as $market) {
+        DB::table('markets')
+            ->insert([
+                'stock_id' => 64,
+                'symbol' => $market['symbol'],
+                'active' => isset($market['active']) ? $market['active'] : 1
+            ]);
+    }
+
+    dd(count($markets));
+
+});
+
+/**
+ * тест
+ */
+Artisan::command('ccex', function () {
+    $exchange = new \ccxt\ccex([
+//        'verbose' => true,
+//        'proxy' => 'https://cors-anywhere.herokuapp.com/',
+        'origin' => 'foobar',
+    ]);
+    $exchange->userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15';
+    $exchange->enableRateLimit = true; // enable
+
+//    dd(1);
+    $markets = $exchange->fetchTicker ('ETH/BTC');
+
+    dd(count($markets));
+
+});
+
+
+Artisan::command('get_markets', function () {
+
+    $stocks = \App\Models\Stock::where('ccxt_id', 'exx')->get();
 
     foreach ($stocks as $stock) {
 
-        $error = null;
-
-        if(in_array($stock->ccxt_id, ['_1broker', '_1btcxe', 'coincheck', 'allcoin', 'anxpro', 'bit2c'])) continue;
-
         $exchange = '\\ccxt\\' . $stock->ccxt_id;
-        $exchange = new $exchange (['timeout' => 30000]);
+        $exchange = new $exchange ();
 
-        echo PHP_EOL . $stock->ccxt_id;
+        $this->info($stock->name);
 
-        try{
-            $pairs = $exchange->fetch_tickers();
+        try {
+            $markets = $exchange->load_markets();
+//        $markets = $exchange->fetch_tickers();
         } catch (Exception $e) {
+            $this->error($e->getMessage());
             continue;
         }
 
-        $pairs = $exchange->fetch_tickers();
-
-        $count = count($pairs);
-
-        echo ' ' . $count;
-
-
-        DB::table('stocks')
-            ->where('id', $stock->id)
-            ->update([
-                'market_qty' => $count
-            ]);
+        foreach ($markets as $market) {
+            DB::table('markets')
+                ->insert([
+                    'stock_id' => $stock->id,
+                    'symbol' => $market['symbol'],
+                    'active' => isset($market['active']) ? $market['active'] : 1
+                ]);
+        }
 
     }
 
-})->describe('Получить сиакани по парі на біржі');
+})->describe('Получить пари');
+
+
+Artisan::command('arb:inter_update', function () {
+
+    dd('wqeqweq');
+
+    $stocks = \App\Models\Stock::whereNull('error')->get();
+
+    foreach ($stocks as $stock) {
+
+        $exchange = '\\ccxt\\' . $stock->ccxt_id;
+        $exchange = new $exchange ();
+
+        $this->info($stock->name);
+
+        try {
+            $markets = $exchange->load_markets();
+//        $markets = $exchange->fetch_tickers();
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+            continue;
+        }
+
+        foreach ($markets as $market) {
+            DB::table('markets')
+                ->where('id', $stock->id)
+                ->insert([
+                    'stock_id' => $stock->id,
+                    'symbol' => $market['symbol'],
+                    'active' => isset($market['active']) ? $market['active'] : 1
+                ]);
+        }
+
+    }
+});
+
+ // select symbol, count(*) as stock_qty from `markets` where active = 1 group by symbol having stock_qty > 2 order by stock_qty desc
