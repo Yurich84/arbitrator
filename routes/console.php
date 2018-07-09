@@ -127,16 +127,18 @@ Artisan::command('ticker {exchange} {symbol}', function ($exchange, $symbol) {
  * Найти все биржи где есть bidVolume
  */
 Artisan::command('lm', function () {
-    $exchange = new \ccxt\flowbtc([
+    $exchange = new \ccxt\exmo([
 //        'verbose' => true,
-        'proxy' => 'https://cors-anywhere.herokuapp.com/',
-        'origin' => 'foobar',
+//        'proxy' => 'https://cors-anywhere.herokuapp.com/',
+//        'origin' => 'foobar',
     ]);
     $exchange->userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15';
     $exchange->enableRateLimit = true; // enable
 
 //    dd(1);
     $markets = $exchange->load_markets();
+
+    dd($markets);
 
     foreach ($markets as $market) {
         DB::table('markets')
@@ -154,10 +156,10 @@ Artisan::command('lm', function () {
 /**
  * тест
  */
-Artisan::command('ccex', function () {
-    $exchange = new \ccxt\ccex([
+Artisan::command('ice3x', function () {
+    $exchange = new \ccxt\ice3x([
 //        'verbose' => true,
-//        'proxy' => 'https://cors-anywhere.herokuapp.com/',
+        'proxy' => 'https://cors-anywhere.herokuapp.com/',
         'origin' => 'foobar',
     ]);
     $exchange->userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15';
@@ -166,7 +168,7 @@ Artisan::command('ccex', function () {
 //    dd(1);
     $markets = $exchange->fetchTicker ('ETH/BTC');
 
-    dd(count($markets));
+    dd($markets);
 
 });
 

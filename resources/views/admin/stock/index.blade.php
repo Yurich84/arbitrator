@@ -48,7 +48,7 @@
                                 <td>{{ $stock->market_qty }}</td>
                                 <td>
                                     @if($stock->has_order_vol) * @endif
-                                    {{ $stock->comment }}
+                                    {!! $stock->comment !!}
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.stock.edit', ['id' => $stock->id]) }}" class="teal-text" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">

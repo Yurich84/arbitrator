@@ -24,7 +24,7 @@ class Stock extends Model
         /**
          * Exclude Coinmarketcap
          */
-        static::addGlobalScope('public', function(Builder $builder) {
+        static::addGlobalScope('wo_cmc', function(Builder $builder) {
             $builder->where('stocks.id', '<>', 50);
         });
     }
