@@ -51,7 +51,9 @@ class Kernel extends ConsoleKernel
 
         // запускаем бот по межбиржевому арбитражу
         if(config('bot.inter.go')) {
-
+            $schedule->command('arb:inter')
+                ->cron('*/' . config('bot.inter.timeout') . ' * * * *');
+//                ->appendOutputTo(storage_path('logs/inter_schedule.log'));
         }
 
     }

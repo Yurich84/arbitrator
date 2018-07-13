@@ -30,18 +30,35 @@ class Stock extends Model
     }
 
 
+    public function getTradeUrlAttribute($value)
+    {
+        if(is_null($value)) {
+            return $this->www;
+        } else {
+            return $value;
+        }
+    }
+
+
     /*----------------------------------------
      * Relationships
      *----------------------------------------
      */
 
     /**
-     * Биржа
+     * Ключи для биржи
      */
     public function key()
     {
         return $this->hasOne(Key::class)->where('user_id', \Auth::id());
     }
 
+    /**
+     * Страна
+     */
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
 
 }

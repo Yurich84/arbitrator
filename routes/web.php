@@ -62,6 +62,7 @@ Route::group(['namespace' => 'Admin', 'middleware' => 'auth'], function () {
      * -----------------------------
      */
     Route::get('inter/index', ['uses' => 'InterC@current', 'as' => 'admin.inter.current']);
+    Route::post('inter/index', ['uses' => 'InterC@current', 'as' => 'admin.inter.current_post']);
 
 
 

@@ -107,6 +107,9 @@ Artisan::command('get_rate {symbol}', function ($symbol) {
 
 })->describe('Парсим валюти с coinmarketcap');
 
+
+
+
 /**
  * Показ котировок на конкретной биржи и пари
  */
@@ -127,11 +130,12 @@ Artisan::command('ticker {exchange} {symbol}', function ($exchange, $symbol) {
  * Найти все биржи где есть bidVolume
  */
 Artisan::command('lm', function () {
-    $exchange = new \ccxt\exmo([
-//        'verbose' => true,
-//        'proxy' => 'https://cors-anywhere.herokuapp.com/',
-//        'origin' => 'foobar',
-    ]);
+
+    $stock = \App\Models\Stock::find(4);
+
+    $exchange = '\\ccxt\\' . $stock->ccxt_id;
+    $exchange = new $exchange ();
+
     $exchange->userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15';
     $exchange->enableRateLimit = true; // enable
 
@@ -143,8 +147,12 @@ Artisan::command('lm', function () {
     foreach ($markets as $market) {
         DB::table('markets')
             ->insert([
-                'stock_id' => 64,
+                'stock_id' => $stock->id,
+                'market_id' => $market['id'],
                 'symbol' => $market['symbol'],
+                'base' => $market['base'],
+                'quote' => $market['quote'],
+                'precision' => json_encode($market['precision']),
                 'active' => isset($market['active']) ? $market['active'] : 1
             ]);
     }
@@ -175,12 +183,35 @@ Artisan::command('ice3x', function () {
 
 Artisan::command('get_markets', function () {
 
-    $stocks = \App\Models\Stock::where('ccxt_id', 'exx')->get();
+    $exchanges_w_proxy = [
+        'ccex', 'exx', 'ice3x', 'poloniex', 'okex'
+    ];
+
+    $stocks = \App\Models\Stock::all();
 
     foreach ($stocks as $stock) {
 
         $exchange = '\\ccxt\\' . $stock->ccxt_id;
         $exchange = new $exchange ();
+        $exchange->enableRateLimit = true;
+
+        // если у биржи есть публичние ключи
+        if($stock->pub_key !== null) {
+            $exchange->apiKey = $stock->pub_key;
+        }
+        if($stock->pub_key !== null) {
+            $exchange->secret = $stock->pub_secret;
+        }
+        if($stock->pub_key !== null) {
+            $exchange->uid = $stock->pub_uid;
+        }
+
+        // Для бирж из списка подключаем прокси
+        if(in_array($exchange->id, $exchanges_w_proxy)) {
+            $exchange->proxy = 'https://cors-anywhere.herokuapp.com/';
+            $exchange->origin = 'foobar';
+            $exchange->userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15';
+        }
 
         $this->info($stock->name);
 
@@ -196,7 +227,11 @@ Artisan::command('get_markets', function () {
             DB::table('markets')
                 ->insert([
                     'stock_id' => $stock->id,
+                    'market_id' => $market['id'],
                     'symbol' => $market['symbol'],
+                    'base' => $market['base'],
+                    'quote' => $market['quote'],
+                    'precision' => json_encode($market['precision']),
                     'active' => isset($market['active']) ? $market['active'] : 1
                 ]);
         }
@@ -206,36 +241,21 @@ Artisan::command('get_markets', function () {
 })->describe('Получить пари');
 
 
-Artisan::command('arb:inter_update', function () {
+Artisan::command('stock_update', function () {
 
-    dd('wqeqweq');
 
-    $stocks = \App\Models\Stock::whereNull('error')->get();
+    $stocks = \App\Models\Stock::withoutGlobalScopes()->get();
 
     foreach ($stocks as $stock) {
 
         $exchange = '\\ccxt\\' . $stock->ccxt_id;
         $exchange = new $exchange ();
 
-        $this->info($stock->name);
-
-        try {
-            $markets = $exchange->load_markets();
-//        $markets = $exchange->fetch_tickers();
-        } catch (Exception $e) {
-            $this->error($e->getMessage());
-            continue;
-        }
-
-        foreach ($markets as $market) {
-            DB::table('markets')
-                ->where('id', $stock->id)
-                ->insert([
-                    'stock_id' => $stock->id,
-                    'symbol' => $market['symbol'],
-                    'active' => isset($market['active']) ? $market['active'] : 1
-                ]);
-        }
+        DB::table('stocks')
+            ->where('id', $stock->id)
+            ->update([
+                'country' => current($exchange->countries)
+            ]);
 
     }
 });
