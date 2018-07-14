@@ -11,6 +11,12 @@
 |
 */
 
+Route::pattern('id', '\d+');
+Route::pattern('slug', '[a-z0-9-_]+');
+Route::pattern('url', '[a-z0-9-_]+');
+Route::pattern('pair', '[a-zA-z-_\/]+');
+
+
 Auth::routes();
 Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');
 Route::get('/register', function(){
@@ -46,6 +52,7 @@ Route::group(['namespace' => 'Admin', 'middleware' => 'auth'], function () {
         'names' => 'admin.key'
     ]);
 
+
     /*-------------------------------
      *    Внутрибиржевой арбитраж
      * -----------------------------
@@ -57,12 +64,15 @@ Route::group(['namespace' => 'Admin', 'middleware' => 'auth'], function () {
     Route::get('triangle/get_data/{id}', ['uses' => 'TriangleC@getTrioData', 'as' => 'admin.triangle.get_data']);
     Route::get('triangle/show_data/{id}', ['uses' => 'TriangleC@showTrioData', 'as' => 'admin.triangle.show_data']);
 
+
     /*-------------------------------
      *    Внешнебиржевой арбитраж
      * -----------------------------
      */
     Route::get('inter/index', ['uses' => 'InterC@current', 'as' => 'admin.inter.current']);
     Route::post('inter/index', ['uses' => 'InterC@current', 'as' => 'admin.inter.current_post']);
+
+    Route::get('inter/show/{up_id}/{pair}', ['uses' => 'InterC@show', 'as' => 'admin.inter.show']);
 
 
 

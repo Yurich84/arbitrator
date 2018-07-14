@@ -1,0 +1,43 @@
+.arb_table td {
+    display: table-cell;
+    vertical-align: middle;
+}
+.table.arb_table thead th {
+    vertical-align: top !important;
+    border-bottom: 2px solid #dee2e6;
+}
+
+table.arb_table {
+    border-collapse:separate;
+}
+table.arb_table td:hover {
+    border:1px solid #999;
+}
+
+.table_info_diag {
+    position: relative;
+    height:40px;
+    width: 110px;
+    background: -webkit-linear-gradient(30deg, green 50%, lightpink 51%);
+    background: linear-gradient(30deg, green 50%, lightpink 51%);
+    color:white;
+}
+.sell_diag, .buy_diag {
+    position: absolute;
+    padding: 0.4rem;
+    font-weight:bold;
+    font-size: .8rem;
+}
+.buy_diag {
+    left: 0; bottom: 0;
+}
+.sell_diag {
+    right: 0; top: 0;
+}
+
+.bg_1 {background: #ffedee;}
+.bg_1_1 {background: #fff;}
+.bg_1_5 {background: #effff3;}
+.bg_5_10 {background: #d4edda;}
+.bg_10_20 {background: #bee8c8;}
+.bg_20 {background: #7dc68e;}

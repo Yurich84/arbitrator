@@ -13,7 +13,7 @@
         <div class="row">
             <label class="control-label col-md-4 p-2">Minimum value:</label>
             <div class="col-md-7">
-                <input name="min_volume" value="1" type="text" class="form-control"/>
+                <input name="min_volume" value="{{ $min_volume }}" type="text" class="form-control"/>
             </div>
         </div>
     </div>

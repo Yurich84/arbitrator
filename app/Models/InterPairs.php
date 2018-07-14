@@ -10,6 +10,16 @@ class InterPairs extends Model
     protected $guarded = [];
     public $timestamps = false;
 
+    /**
+     * получаем key
+     * @param $value
+     * @return string
+     */
+    public function getVolumeAttribute($value)
+    {
+        return $value ?: 0;
+    }
+
     /*----------------------------------------
      * Relationships
      *----------------------------------------

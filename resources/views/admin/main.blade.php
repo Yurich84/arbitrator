@@ -8,6 +8,7 @@
 
     <link href="{{ asset('/css/main.css') }}" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="{{ asset('/css/custom.css') }}" rel="stylesheet">
     @yield('styles')
     @stack('style')
 

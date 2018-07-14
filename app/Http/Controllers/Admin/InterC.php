@@ -11,12 +11,17 @@ use Illuminate\Http\Request;
 class InterC extends Controller
 {
 
+    /**
+     * Список текуших вилок
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function current(Request $request)
     {
 
         $min_profit = preg_replace('/[^0-9.]/', '', $request->get('sliderleft', 1));
         $max_profit = preg_replace('/[^0-9.]/', '', $request->get('sliderright', 50));
-        $crypto_curr_only = $request->get('crypto_curr_only', false);
+        $crypto_curr_only = $request->get('crypto_curr_only', 1);
         $min_volume = $request->get('min_volume', 1);
         $stock_ids = [];
 
@@ -25,7 +30,7 @@ class InterC extends Controller
         $query = InterPairs::with('stock', 'stock.country')
             ->where('up_id', $last_up->id)
             ->whereNotNull('symbol_id')
-            ->where('price', '>', 0)
+            ->where('last', '>=', 0)
             ->where('volume', '>', $min_volume);
 
         $pairs = $query->oldest('symbol')->get();
@@ -69,22 +74,22 @@ class InterC extends Controller
                     $item->stock_url = $stock_url;
                 });
 
-                $pair_min_price = $pair_group->where('price', $pair_group->min('price'))->first();
-                $pair_max_price = $pair_group->where('price', $pair_group->max('price'))->first();
+                $pair_min_price = $pair_group->where('last', $pair_group->min('last'))->first();
+                $pair_max_price = $pair_group->where('last', $pair_group->max('last'))->first();
 
                 //план тут надо у минимального находить цену по которой предлагают а у максимального по которой покупают
 
-                $percent = round(($pair_max_price->price - $pair_min_price->price)/$pair_max_price->price*100, 4); // %
+                $percent = round(($pair_max_price->last - $pair_min_price->last)/$pair_max_price->last*100, 4); // %
 
                 $res[] = (object) [
                     'symbol' => $pair_group->first()->symbol,
                     'stock_min' => $pair_min_price->stock,
                     'stock_min_url' => $pair_min_price->stock_url,
-                    'stock_min_price' => $pair_min_price->price,
+                    'stock_min_price' => $pair_min_price->last,
                     'stock_min_volume' => $pair_min_price->volume,
                     'stock_max' => $pair_max_price->stock,
                     'stock_max_url' => $pair_max_price->stock_url,
-                    'stock_max_price' => $pair_max_price->price,
+                    'stock_max_price' => $pair_max_price->last,
                     'stock_max_volume' => $pair_max_price->volume,
                     'comparision' => $pair_group,
                     'percent' => $percent
@@ -102,9 +107,24 @@ class InterC extends Controller
             ->sortByDesc('percent');
 
         return view('admin.inter.current', compact(
-            'res', 'last_up', 'current_stocks', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_value'
+            'res', 'last_up', 'current_stocks', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_volume'
         ));
 
     }
 
+
+    public function show($up_id, $pair)
+    {
+
+        $last_up = Update::find($up_id);
+
+        // Список бирж
+        $stocks = InterPairs::with('stock')
+            ->where('symbol', $pair)
+            ->where('last', '>', 0)
+            ->where('up_id', $up_id)
+            ->get();
+
+        return view('admin.inter.show', compact('pair', 'last_up', 'stocks'));
+    }
 }

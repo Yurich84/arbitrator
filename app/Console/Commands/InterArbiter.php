@@ -130,7 +130,9 @@ class InterArbiter extends Command
                             \DB::table('inter_pairs')->insert([
                                 'stock_id' => $stock->id,
                                 'symbol' => $tiker['symbol'],
-                                'price' => $tiker['last'],
+                                'last' => $tiker['last'],
+                                'bid' => $tiker['bid'],
+                                'ask' => $tiker['ask'],
                                 'volume' => $tiker['quoteVolume'], // количество биткоиновив, ефирумов или чего там (того к чему торгуеться основная)
                                 'up_id' => $up_id,
                                 'symbol_id' => $trading_symbol->id

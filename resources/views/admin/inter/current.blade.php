@@ -45,7 +45,7 @@
                                     <p class="p-2 m-0">
                                         {{ $item->symbol }} &nbsp;
                                         <a href="#" class="fa fa-line-chart"></a> &nbsp;
-                                        <a href="#" class="fa fa-table"></a>
+                                        <a href="{{ route('admin.inter.show', ['up_id' => $last_up->id, 'pair' => $item->symbol]) }}" class="fa fa-table"></a>
                                     </p></td>
                                 <td>
                                     <div class="float-left p-2">Buy:</div>
@@ -92,10 +92,10 @@
                                 <td></td>
                                 <td>
                                     <table class="table table-sm">
-                                        @foreach($item->comparision->sortBy('price') as $item_gr)
+                                        @foreach($item->comparision->sortBy('last') as $item_gr)
                                             <tr>
                                                 <td><a href="{{ $item_gr->stock_url }}" target="_blank">{{ $item_gr->stock->name }}</a></td>
-                                                <td>Price: {{ rtrim(number_format($item_gr->price, 10), 0) }}</td>
+                                                <td>Price: {{ rtrim(number_format($item_gr->last, 10), 0) }}</td>
                                                 <td><span class="small">Vol: {{ $item_gr->volume }} {{ explode('/', $item_gr->symbol)[1] }}</span></td>
                                             </tr>
                                         @endforeach
