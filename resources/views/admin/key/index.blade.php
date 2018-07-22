@@ -37,11 +37,9 @@
                                 </td>
                                 <td>
                                     {!! Form::open(['method' => 'DELETE', 'route' => ['admin.key.destroy', $key->id]]) !!}
-
                                     <a href="#" class="data-delete">
                                         <i class="fa fa-trash text-danger"></i>
                                     </a>
-
                                     {{ Form::close() }}
                                 </td>
                             </tr>

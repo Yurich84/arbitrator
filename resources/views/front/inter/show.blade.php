@@ -1,4 +1,4 @@
-@extends('admin.main')
+@extends('front.main')
 
 @section('name', 'Market ' . $pair)
 @section('desc', \Carbon\Carbon::parse($last_up->time)->format('Y M d (H:I)'))
@@ -36,12 +36,15 @@
 
                             @foreach($stocks as $stock_head1)
                                 <th bgcolor="#f4edda" class="text-center table_exchange">
-                                    <img style="max-width: 100%" src="/imgs/stocks/{{ $stock_head1->stock->logo }}"
-                                         alt="{{ $stock_head1->stock->name }}"
-                                         data-original-title="{{ $stock_head1->stock->name }}"
-                                         data-toggle="tooltip"
-                                         data-placement="top"
-                                    />
+                                    <a href="{{ $stock_head1->stock_url }}" target="_blank">
+                                        <img style="max-width: 100%" src="/imgs/stocks/{{ $stock_head1->stock->logo }}"
+                                             alt="{{ $stock_head1->stock->name }}"
+                                             data-original-title="{{ $stock_head1->stock->name }}"
+                                             data-toggle="tooltip"
+                                             data-placement="top"
+                                        />
+                                    </a>
+
                                     <div class="alert-info m-1">Price: {{ rtrim(number_format($stock_head1->last, 10), 0) }}</div>
                                     <div class="alert-info m-1">Vol: {{ $stock_head1->volume or 0 }}</div>
                                 </th>
@@ -53,12 +56,14 @@
                         @foreach($stocks as $stock1)
                             <tr>
                                 <td bgcolor="#f4edda" class="text-center table_exchange">
-                                    <img src="/imgs/stocks/{{ $stock1->stock->logo }}"
-                                         alt="{{ $stock1->stock->name }}"
-                                         data-original-title="{{ $stock1->stock->name }}"
-                                         data-toggle="tooltip"
-                                         data-placement="top"
-                                    />
+                                    <a href="{{ $stock1->stock_url }}" target="_blank">
+                                        <img src="/imgs/stocks/{{ $stock1->stock->logo }}"
+                                             alt="{{ $stock1->stock->name }}"
+                                             data-original-title="{{ $stock1->stock->name }}"
+                                             data-toggle="tooltip"
+                                             data-placement="top"
+                                        />
+                                    </a>
                                     <br/>
                                     <div class="alert-info m-1">{{ rtrim(number_format($stock1->last, 10), 0) }}</div>
                                     <div class="alert-info m-1">Vol: {{ $stock1->volume or 0 }}</div>
@@ -77,7 +82,7 @@
                                             @elseif($price > 20) bg_20
                                             @endif
                                             ">{{ $price }}%
-                                            @php $min_vol = min($stock1->volume, $stock1->volume) @endphp
+                                            @php $min_vol = min($stock1->volume, $stock2->volume) @endphp
                                             <div class="
                                             @if($min_vol < 1) text-danger @endif
                                              m-1">vol: {{ $min_vol }}</div>

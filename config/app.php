@@ -14,6 +14,8 @@ return [
     */
 
     'name' => env('APP_NAME', 'Arbitrator'),
+    'email' => env('APP_EMAIL', 'Yurich84@gmail.com'),
+    'dev_email' => 'Yurich84@gmail.com',
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +28,7 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'production'),
+    'env' => env('APP_ENV', 'prod'),
 
     /*
     |--------------------------------------------------------------------------
@@ -157,7 +159,7 @@ return [
 
         // prod
         Collective\Html\HtmlServiceProvider::class,
-//        Yajra\Datatables\DatatablesServiceProvider::class,
+        Yajra\Datatables\DatatablesServiceProvider::class,
 
         /*
          * Application Service Providers...

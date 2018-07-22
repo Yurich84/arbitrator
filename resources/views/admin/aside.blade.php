@@ -43,19 +43,5 @@
         </li>
         --}}
 
-        <li class="treeview @if( in_array(Route::currentRouteName(), ['admin.inter.current'] )) is-expanded @endif ">
-            <a class="app-menu__item" href="#" data-toggle="treeview">
-                <i class="app-menu__icon fa fa-th-list"></i>
-                <span class="app-menu__label">Внешнебиржевой</span>
-                <i class="treeview-indicator fa fa-angle-right"></i>
-            </a>
-            <ul class="treeview-menu">
-                <li><a class="treeview-item @if( Route::currentRouteName() == 'admin.inter.current' ) active @endif" href="{{ route('admin.inter.current') }}">
-                        <i class="app-menu__icon fa fa-file-text"></i>
-                        <span class="app-menu__label">Текущие</span></a>
-                </li>
-            </ul>
-        </li>
-
     </ul>
 </aside>

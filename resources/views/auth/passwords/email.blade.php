@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('front.main')
 
 @section('content')
 <div class="container">
@@ -8,14 +8,14 @@
                 <div class="card-header">{{ __('Reset Password') }}</div>
 
                 <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success">
-                            {{ session('status') }}
+                    @if ($errors->has('confirmation') > 0 )
+                        <div class="alert alert-danger" role="alert">
+                            {!! $errors->first('confirmation') !!}
                         </div>
                     @endif
 
                     <form method="POST" action="{{ route('password.email') }}">
-                        @csrf
+                        {{ csrf_field() }}
 
                         <div class="form-group row">
                             <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>

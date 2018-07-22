@@ -1,4 +1,4 @@
-{{ Form::open(['route' => 'admin.inter.current_post', 'method' => 'post', 'class' => 'form-horizontal']) }}
+{{ Form::open(['route' => 'inter.current_post', 'method' => 'post', 'class' => 'form-horizontal']) }}
 <div class="row form-group">
     <div class="col-md-2 lead pt-4">
         Profit:
@@ -11,7 +11,7 @@
 <div class="row form-group mr-0 ml-0">
     <div class="col-md-4 border pt-3">
         <div class="row">
-            <label class="control-label col-md-4 p-2">Minimum value:</label>
+            <label class="control-label col-md-4 p-2">Minimum volume:</label>
             <div class="col-md-7">
                 <input name="min_volume" value="{{ $min_volume }}" type="text" class="form-control"/>
             </div>

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\FiatCurency;
 use App\Models\InterPairs;
 use App\Models\Update;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class InterC extends Controller
@@ -106,25 +107,84 @@ class InterC extends Controller
             ->where('percent', '<', $max_profit)
             ->sortByDesc('percent');
 
-        return view('admin.inter.current', compact(
+        return view('front.inter.current', compact(
             'res', 'last_up', 'current_stocks', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_volume'
         ));
 
     }
 
 
+    /**
+     * Таблица профитности по конкретной паре
+     * @param $up_id
+     * @param $pair
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function show($up_id, $pair)
     {
-
         $last_up = Update::find($up_id);
 
         // Список бирж
         $stocks = InterPairs::with('stock')
             ->where('symbol', $pair)
             ->where('last', '>', 0)
+            ->where('volume', '>', 1)
             ->where('up_id', $up_id)
             ->get();
 
-        return view('admin.inter.show', compact('pair', 'last_up', 'stocks'));
+        $stocks->map(function ($item) {
+            list($base, $quote) = explode('/', $item->symbol);
+            $stock_url = $item->stock->trade_url;
+            $stock_url = str_replace('aa', mb_strtolower($base), $stock_url);
+            $stock_url = str_replace('bb', mb_strtolower($quote), $stock_url);
+            $stock_url = str_replace('AA', mb_strtoupper($base), $stock_url);
+            $stock_url = str_replace('BB', mb_strtoupper($quote), $stock_url);
+
+            $item->stock_url = $stock_url;
+        });
+
+        return view('front.inter.show', compact('pair', 'last_up', 'stocks'));
     }
+
+    public function history($pair)
+    {
+        // Список бирж
+        $inter_pair = InterPairs::with('stock')
+            ->join('inter_updates as up', 'inter_pairs.up_id', '=', 'up.id')
+            ->where('symbol', $pair)
+            ->where('last', '>', 0)
+            ->where('volume', '>', 1)
+            ->get();
+
+        $stocks = $inter_pair->groupBy('stock_id');
+
+        $labels = Update::groupBy(\DB::raw('DATE(time)'))->get()->pluck('time');
+
+        $datasets = [];
+        foreach ($stocks as $ups) {
+            $color = mt_rand(0, 255) . ',' . mt_rand(0, 255) . ',' . mt_rand(0, 255);
+
+            $ups0 = $ups->groupBy(function($item) {
+                return Carbon::parse($item->time)->format('Y-m-d');
+            });
+
+            $data = [];
+            foreach ($ups0 as $st) {
+                $data[] = $st->first()->last;
+            }
+
+
+            $datasets[] = (object) [
+                'label' => $ups->first()->stock->name,
+                'backgroundColor' => 'rgba(255, 255, 255, 0)',
+                'borderColor' => 'rgba(' . $color . ',1)',
+                'tension' => '0.4',
+                'radius' => '2',
+                'data' => $data,
+            ];
+        }
+
+        return view('front.inter.history', compact('pair', 'datasets', 'labels'));
+    }
+
 }

@@ -1,4 +1,4 @@
-@extends('admin.main')
+@extends('front.main')
 
 @section('name', 'Вилки внешнебиржевого арбитража')
 @section('desc', 'Вилка - арбитражная ситуация')
@@ -9,7 +9,7 @@
         <div class="col-12">
             <div class="tile">
                 <div class="tile-body">
-                    @include('admin.inter._form')
+                    @include('front.inter._form')
                 </div>
             </div>
 
@@ -44,8 +44,8 @@
                                 <td>
                                     <p class="p-2 m-0">
                                         {{ $item->symbol }} &nbsp;
-                                        <a href="#" class="fa fa-line-chart"></a> &nbsp;
-                                        <a href="{{ route('admin.inter.show', ['up_id' => $last_up->id, 'pair' => $item->symbol]) }}" class="fa fa-table"></a>
+                                        <a href="{{ route('inter.history', ['pair' => $item->symbol]) }}" class="fa fa-line-chart"></a> &nbsp;
+                                        <a href="{{ route('inter.show', ['up_id' => $last_up->id, 'pair' => $item->symbol]) }}" class="fa fa-table"></a>
                                     </p></td>
                                 <td>
                                     <div class="float-left p-2">Buy:</div>

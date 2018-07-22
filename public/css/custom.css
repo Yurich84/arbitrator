@@ -41,3 +41,11 @@ table.arb_table td:hover {
 .bg_5_10 {background: #d4edda;}
 .bg_10_20 {background: #bee8c8;}
 .bg_20 {background: #7dc68e;}
+
+
+.has-error {
+    color: var(--danger);
+}
+.has-error input {
+    border-color: var(--danger);
+}

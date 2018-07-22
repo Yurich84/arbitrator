@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -34,6 +35,13 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
+        if ($this->shouldReport($exception) && ! \App::isLocal()) {
+            try {
+                $this->sendMail($exception);
+            } catch (Exception $e) {
+                dd($e);
+            }
+        }
         parent::report($exception);
     }
 
@@ -41,11 +49,35 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
+     * @param  \Exception  $e
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Exception $e)
     {
-        return parent::render($request, $exception);
+        if ($this->isHttpException($e))
+        {
+            if($e instanceof NotFoundHttpException) {
+                \View::share('breadcrumbs', [['name' => 404]]);
+                return response()->view('errors.404', ['message' => $e->getMessage()], 404, ['Content-type' => 'text/html; charset=utf-8']);
+            }
+            return $this->renderHttpException($e);
+        } elseif($this->shouldReport($e) && ! \App::isLocal()) {
+            return response()->view('errors.500', ['message' => $e->getMessage()], 500);
+        }
+        return parent::render($request, $e);
+    }
+
+
+    protected function sendMail($e)
+    {
+        $text = "url: " . \Request::fullUrl();
+        $text .= " \n\rmessage: " . $e->getMessage();
+        $text .= " \n\rfile: " . $e->getFile();
+        $text .= " \n\rline: " . $e->getLine();
+
+        \Mail::raw($text, function ($message) {
+            $message->to(config('app.dev_email'), $name = null);
+            $message->subject('Exception');
+        });
     }
 }
