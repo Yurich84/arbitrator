@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FiatCurency;
 use App\Models\InterPairs;
 use App\Models\Update;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -19,12 +20,25 @@ class InterC extends Controller
      */
     public function current(Request $request)
     {
+        if (! $request->isMethod('post') && \Auth::check() && ! is_null(\Auth::user()->filter_pref)) {
+            // если сохранени настройки то подгружаем
+            $request->request->add(unserialize(\Auth::user()->filter_pref));
+        }
 
-        $min_profit = preg_replace('/[^0-9.]/', '', $request->get('sliderleft', 1));
-        $max_profit = preg_replace('/[^0-9.]/', '', $request->get('sliderright', 50));
-        $crypto_curr_only = $request->get('crypto_curr_only', 1);
-        $min_volume = $request->get('min_volume', 1);
-        $stock_ids = [];
+        $req = [];
+
+        $min_profit = $req['sliderleft'] = preg_replace('/[^0-9.]/', '', $request->get('sliderleft', 1));
+        $max_profit = $req['sliderright'] = preg_replace('/[^0-9.]/', '', $request->get('sliderright', 50));
+        $crypto_curr_only = $req['crypto_curr_only'] = $request->get('crypto_curr_only', 0);
+        $min_volume = $req['min_volume'] = $request->get('min_volume', 1);
+        $save_filter = $req['save_filter'] = $request->get('save_filter', 0);
+        $stock_ids = $req['stock_ids'] = $request->get('stock_ids', []);
+
+        if($save_filter == 1 && $user = \Auth::user()) {
+            // сохраняем настройки фильтра для пользователя
+            $user->filter_pref = serialize($req);
+            $user->save();
+        }
 
         $last_up = Update::latest('id')->first();
 
@@ -33,6 +47,15 @@ class InterC extends Controller
             ->whereNotNull('symbol_id')
             ->where('last', '>=', 0)
             ->where('volume', '>', $min_volume);
+
+        // список бирж участвубщих в поиске
+        $stocks_query = clone $query;
+        $stocks = $stocks_query->groupBy('stock_id')->get();
+        if( empty($stock_ids)) {
+            $stock_ids = $stocks->pluck('stock_id');
+        }
+
+        $query->whereIn('stock_id', $stock_ids);
 
         $pairs = $query->oldest('symbol')->get();
 
@@ -108,7 +131,7 @@ class InterC extends Controller
             ->sortByDesc('percent');
 
         return view('front.inter.current', compact(
-            'res', 'last_up', 'current_stocks', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_volume'
+            'res', 'last_up', 'stocks', 'current_stocks', 'stock_ids', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_volume', 'save_filter'
         ));
 
     }
@@ -143,9 +166,14 @@ class InterC extends Controller
             $item->stock_url = $stock_url;
         });
 
-        return view('front.inter.show', compact('pair', 'last_up', 'stocks'));
+        return view('front.inter.table', compact('pair', 'last_up', 'stocks'));
     }
 
+    /**
+     * Динамика изменения цена на биржах
+     * @param $pair
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function history($pair)
     {
         // Список бирж

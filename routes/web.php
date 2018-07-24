@@ -46,7 +46,7 @@ Route::group(['namespace' => 'Front'], function () {
     Route::get('/', ['uses' => 'InterC@current', 'as' => 'inter.current']);
     Route::post('/', ['uses' => 'InterC@current', 'as' => 'inter.current_post']);
 
-    Route::get('inter/show/{up_id}/{pair}', ['uses' => 'InterC@show', 'as' => 'inter.show']);
+    Route::get('inter/table/{up_id}/{pair}', ['uses' => 'InterC@show', 'as' => 'inter.table']);
     Route::get('inter/history/{pair}', ['uses' => 'InterC@history', 'as' => 'inter.history']);
 });
 

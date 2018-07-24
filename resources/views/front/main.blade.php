@@ -20,7 +20,7 @@
     <!--Main layout-->
     <main style="margin-top: 70px;">
 
-        <div class="container-fluid">
+        <div class="container">
 
             @include('alerts')
 

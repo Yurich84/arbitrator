@@ -7,7 +7,8 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="tile">
+            <button class="btn btn-link filter_show_btn">Filter</button>
+            <div class="tile filter_show">
                 <div class="tile-body">
                     @include('front.inter._form')
                 </div>
@@ -28,7 +29,12 @@
                     <br clear="all"/><br/>
 
                     @foreach($current_stocks as $stock)
-                        <img class="border float-left m-1" src="/imgs/stocks/{{ $stock->logo }}" alt="{{ $stock->name }}" />
+                        <img class="border float-left m-1" src="/imgs/stocks/{{ $stock->logo }}"
+                             alt="{{ $stock->name }}"
+                             data-original-title="{{ $stock->name }}"
+                             data-toggle="tooltip"
+                             data-placement="top"
+                        />
                     @endforeach
 
                     <br clear="all"/><br/>
@@ -44,8 +50,8 @@
                                 <td>
                                     <p class="p-2 m-0">
                                         {{ $item->symbol }} &nbsp;
-                                        <a href="{{ route('inter.history', ['pair' => $item->symbol]) }}" class="fa fa-line-chart"></a> &nbsp;
-                                        <a href="{{ route('inter.show', ['up_id' => $last_up->id, 'pair' => $item->symbol]) }}" class="fa fa-table"></a>
+                                        <a href="{{ route('inter.history', ['pair' => $item->symbol]) }}" class="history_link fa fa-line-chart"></a> &nbsp;
+                                        <a href="{{ route('inter.table', ['up_id' => $last_up->id, 'pair' => $item->symbol]) }}" class="table_link fa fa-table"></a>
                                     </p></td>
                                 <td>
                                     <div class="float-left p-2">Buy:</div>
@@ -119,6 +125,17 @@
     <script>
 
         $( document ).ready(function() {
+
+            $('.filter_show_btn').click(function (e) {
+                e.preventDefault();
+                var filter = $('.filter_show');
+                if(filter.is(":visible")){
+                    filter.hide();
+                } else {
+                    filter.show();
+                }
+            });
+
             $('.comparision_link').click(function (e) {
                 e.preventDefault();
                 var comparision = $(this).parent().parent().next();
@@ -127,7 +144,25 @@
                 } else {
                     comparision.show();
                 }
-            })
+            });
+
+
+            $('.history_link').click(function (e) {
+                @if( ! Auth::check() )
+                e.preventDefault();
+                if (!confirm('Для простомра надо зарегестрироваться')) return;
+                location.href = "{{ route('register') }}";
+                @endif
+            });
+
+            $('.table_link').click(function (e) {
+                @if( ! Auth::check() )
+                e.preventDefault();
+                if (!confirm('Для простомра надо зарегестрироваться')) return;
+                location.href = "{{ route('register') }}";
+                @endif
+            });
+
         });
 
         $(function () {
