@@ -7,8 +7,10 @@
 
     <div class="row">
         <div class="col-12">
-            <button class="btn btn-link filter_show_btn">Filter</button>
-            <div class="tile filter_show">
+            <div class="w-100 text-center">
+                <button class="btn btn-link filter_show_btn">Filter</button>
+            </div>
+            <div class="tile filter_show" style="display: none;">
                 <div class="tile-body">
                     @include('front.inter._form')
                 </div>
@@ -31,17 +33,15 @@
                     @foreach($current_stocks as $stock)
                         <img class="border float-left m-1" src="/imgs/stocks/{{ $stock->logo }}"
                              alt="{{ $stock->name }}"
-                             data-original-title="{{ $stock->name }}"
                              data-toggle="tooltip"
+                             data-html="true"
                              data-placement="top"
+                             title='<img src="/imgs/flags/{{ $stock->flag }}" />  {{ $stock->name }} <br/> Cap: {{ number_format($stock->cap) }}'
+                             data-content='123'
                         />
                     @endforeach
 
                     <br clear="all"/><br/>
-
-                    @if($res->count() == 0)
-                        <h3>Updating... Try in a minute</h3>
-                    @endif
 
                     <table class="table table-striped" id="logs-table">
                         <tbody>
@@ -57,11 +57,9 @@
                                     <div class="float-left p-2">Buy:</div>
                                     <div class="float-left p-2">
                                         <img class="border stock_logo" src="/imgs/stocks/{{ $item->stock_min->logo }}" alt="{{ $item->stock_min->name }}"
-                                             data-toggle="popover"
-                                             data-html="true"
+                                             data-original-title="{{ $item->stock_min->name }}"
+                                             data-toggle="tooltip"
                                              data-placement="top"
-                                             title='<img src="/imgs/flags/{{ $item->stock_min->country['flag'] }}" />  <a href="{{ $item->stock_min_url }}" target="_blank">{{ $item->stock_min->name }}</a>'
-                                             data-content=' '
                                         />
                                     </div>
                                     <div class="float-left p-2" style="line-height: 13px;">

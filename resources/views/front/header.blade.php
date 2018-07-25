@@ -2,6 +2,9 @@
     <a class="app-header__logo" href="/">Arbitrator</a>
     <!-- Navbar Right Menu-->
     <ul class="app-nav">
+        <li><a class="app-nav__item" href="#">Test</a></li>
+        <li><a class="app-nav__item" href="#">Test</a></li>
+        <li><a class="app-nav__item" href="#">Test</a></li>
         <!-- User Menu-->
         @if( Auth::check() )
             <li><a class="app-nav__item" href="#"><i class="fa fa-user fa-lg"></i> hello {{ Auth::user()->name }}</a></li>

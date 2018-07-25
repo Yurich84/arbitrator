@@ -27,8 +27,9 @@ class InterC extends Controller
 
         $req = [];
 
-        $min_profit = $req['sliderleft'] = preg_replace('/[^0-9.]/', '', $request->get('sliderleft', 1));
-        $max_profit = $req['sliderright'] = preg_replace('/[^0-9.]/', '', $request->get('sliderright', 50));
+        $profit_slider = $req['profit_slider'] = $request->get('profit_slider', '1;50');
+        list($min_profit, $max_profit) = explode(';', $profit_slider);
+
         $crypto_curr_only = $req['crypto_curr_only'] = $request->get('crypto_curr_only', 0);
         $min_volume = $req['min_volume'] = $request->get('min_volume', 1);
         $save_filter = $req['save_filter'] = $request->get('save_filter', 0);
@@ -40,7 +41,9 @@ class InterC extends Controller
             $user->save();
         }
 
-        $last_up = Update::latest('id')->first();
+        $last_up = Update::latest('id')
+            ->where('time', '<', Carbon::now()->subMinutes(3))
+            ->first();
 
         $query = InterPairs::with('stock', 'stock.country')
             ->where('up_id', $last_up->id)
@@ -76,6 +79,8 @@ class InterC extends Controller
             return $item = (object) [
                 'name' => $val->first()->stock->name,
                 'logo' => $val->first()->stock->logo,
+                'cap'  => $val->first()->stock->volume_btc,
+                'flag' => $val->first()->stock->country->flag,
             ];
         });
 
