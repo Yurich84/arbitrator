@@ -1,16 +1,17 @@
+
 @media (min-width: 1600px) {
     .container {
         max-width: 1500px;
     }
 }
 
+h2 {
+    font-weight: inherit;
+}
+
 .app-header {
-    font-family: Montserrat, sans-serif;
     margin-bottom: 0;
     background-color: #2d2d30;
-    border: 0;
-    font-size: 11px !important;
-    letter-spacing: 4px;
     opacity: 0.9;
 }
 .app-header__logo {
@@ -24,6 +25,10 @@
 .table.arb_table thead th {
     vertical-align: top !important;
     border-bottom: 2px solid #dee2e6;
+}
+
+.inter-table th, .inter-table td {
+    padding: 0.3rem;
 }
 
 table.arb_table {

@@ -1,9 +1,9 @@
 @extends('front.main')
 
-@section('name', 'Market ' . $pair)
-@section('desc', \Carbon\Carbon::parse($last_up->time)->format('Y M d (H:I)'))
-
 @section('content')
+
+    <a class="btn btn-primary" href="{{ route('inter.history', ['pair' => $pair]) }}">Table</a>
+    <br/><br/>
 
     <div class="row">
         <div class="col-12">
@@ -45,7 +45,10 @@
                                         />
                                     </a>
 
-                                    <div class="alert-info m-1">Price: {{ rtrim(number_format($stock_head1->last, 10), 0) }}</div>
+                                    <div class="alert-info m-1">
+                                        Bid: {{ rtrim(number_format($stock_head1->bid, 10), 0) }}
+                                        Last: {{ rtrim(number_format($stock_head1->last, 10), 0) }}
+                                    </div>
                                     <div class="alert-info m-1">Vol: {{ $stock_head1->volume or 0 }}</div>
                                 </th>
                             @endforeach
@@ -53,26 +56,36 @@
                         </thead>
 
                         <tbody>
-                        @foreach($stocks as $stock1)
+                        @foreach($stocks as $stock_buy)
                             <tr>
                                 <td bgcolor="#f4edda" class="text-center table_exchange">
-                                    <a href="{{ $stock1->stock_url }}" target="_blank">
-                                        <img src="/imgs/stocks/{{ $stock1->stock->logo }}"
-                                             alt="{{ $stock1->stock->name }}"
-                                             data-original-title="{{ $stock1->stock->name }}"
+                                    <a href="{{ $stock_buy->stock_url }}" target="_blank">
+                                        <img src="/imgs/stocks/{{ $stock_buy->stock->logo }}"
+                                             alt="{{ $stock_buy->stock->name }}"
+                                             data-original-title="{{ $stock_buy->stock->name }}"
                                              data-toggle="tooltip"
                                              data-placement="top"
                                         />
                                     </a>
                                     <br/>
-                                    <div class="alert-info m-1">{{ rtrim(number_format($stock1->last, 10), 0) }}</div>
-                                    <div class="alert-info m-1">Vol: {{ $stock1->volume or 0 }}</div>
+                                    <div class="alert-info m-1">{{ rtrim(number_format($stock_buy->ask, 10), 0) }}</div>
+                                    <div class="alert-info m-1">Vol: {{ $stock_buy->volume or 0 }}</div>
                                 </td>
-                                @foreach($stocks as $stock2)
-                                    @if($stock1->stock_id == $stock2->stock_id)
+                                @php
+                                    if($stock_buy->ask == 0 && $stock_buy->last > 0) {
+                                        $stock_buy_ask = $stock_buy->last;
+                                    } else $stock_buy_ask = $stock_buy->ask;
+                                @endphp
+                                @foreach($stocks as $stock_sell)
+                                    @php
+                                        if($stock_sell->bid == 0 && $stock_sell->last > 0) {
+                                            $stock_sell_bid = $stock_sell->last;
+                                        } else $stock_sell_bid = $stock_sell->bid;
+                                    @endphp
+                                    @if($stock_buy->stock_id == $stock_sell->stock_id)
                                         <td bgcolor="#f4edda" class="text-center">-</td>
-                                    @elseif($stock2->last > 0)
-                                        @php $price = round((($stock2->last - $stock1->last)/$stock2->last * 100), 2) @endphp
+                                    @elseif($stock_sell_bid > 0 && $stock_buy_ask > 0)
+                                        @php $price = round((($stock_sell_bid - $stock_buy_ask)/$stock_sell_bid * 100), 2) @endphp
                                         <td class="text-center
                                             @if($price < -1) bg_1
                                             @elseif($price < 1) bg_1_1
@@ -82,7 +95,7 @@
                                             @elseif($price > 20) bg_20
                                             @endif
                                             ">{{ $price }}%
-                                            @php $min_vol = min($stock1->volume, $stock2->volume) @endphp
+                                            @php $min_vol = min($stock_buy->volume, $stock_sell->volume) @endphp
                                             <div class="
                                             @if($min_vol < 1) text-danger @endif
                                              m-1">vol: {{ $min_vol }}</div>

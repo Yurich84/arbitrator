@@ -1,9 +1,8 @@
 @extends('front.main')
 
-@section('name', 'Вилки внешнебиржевого арбитража')
-@section('desc', 'Вилка - арбитражная ситуация')
-
 @section('content')
+
+    <h1>Вилки внешнебиржевого арбитража</h1>
 
     <div class="row">
         <div class="col-12">
@@ -43,7 +42,7 @@
 
                     <br clear="all"/><br/>
 
-                    <table class="table table-striped" id="logs-table">
+                    <table class="table table-striped inter-table" id="logs-table">
                         <tbody>
                         @foreach($res as $item)
                             <tr>
@@ -56,11 +55,14 @@
                                 <td>
                                     <div class="float-left p-2">Buy:</div>
                                     <div class="float-left p-2">
-                                        <img class="border stock_logo" src="/imgs/stocks/{{ $item->stock_min->logo }}" alt="{{ $item->stock_min->name }}"
-                                             data-original-title="{{ $item->stock_min->name }}"
-                                             data-toggle="tooltip"
-                                             data-placement="top"
-                                        />
+                                        <a href="{{ $item->stock_min_url }}" target="_blank">
+                                            <img class="border stock_logo" src="/imgs/stocks/{{ $item->stock_min->logo }}"
+                                                 alt="{{ $item->stock_min->name }}"
+                                                 data-original-title="{{ $item->stock_min->name }}"
+                                                 data-toggle="tooltip"
+                                                 data-placement="top"
+                                            />
+                                        </a>
                                     </div>
                                     <div class="float-left p-2" style="line-height: 13px;">
                                         Price: {{ rtrim(number_format($item->stock_min_price, 10), 0) }}
@@ -74,13 +76,15 @@
                                 <td>
                                     <div class="float-left p-2">Sell:</div>
                                     <div class="float-left p-2">
-                                        <img class="border stock_logo" src="/imgs/stocks/{{ $item->stock_max->logo }}" alt="{{ $item->stock_max->name }}"
-                                             data-toggle="popover"
-                                             data-html="true"
-                                             data-placement="top"
-                                             title='<img src="/imgs/flags/{{ $item->stock_max->country['flag'] }}" />  <a href="{{ $item->stock_max_url }}" target="_blank">{{ $item->stock_max->name }}</a>'
-                                             data-content=' '
-                                        />
+                                        <a href="{{ $item->stock_max_url }}" target="_blank">
+                                            <img class="border stock_logo" src="/imgs/stocks/{{ $item->stock_max->logo }}"
+                                                 alt="{{ $item->stock_max->name }}"
+                                                 data-original-title="{{ $item->stock_max->name }}"
+                                                 data-toggle="tooltip"
+                                                 data-placement="top"
+                                            />
+                                        </a>
+
                                     </div>
                                     <div class="float-left p-2" style="line-height: 13px;">
                                         Price: {{ rtrim(number_format($item->stock_max_price, 10), 0) }}

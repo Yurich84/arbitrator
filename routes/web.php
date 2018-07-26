@@ -48,6 +48,14 @@ Route::group(['namespace' => 'Front'], function () {
 
     Route::get('inter/table/{up_id}/{pair}', ['uses' => 'InterC@show', 'as' => 'inter.table']);
     Route::get('inter/history/{pair}', ['uses' => 'InterC@history', 'as' => 'inter.history']);
+
+    Route::get('instructions', ['as' => 'instructions', function() {
+        return view('front.page.instructions');
+    } ]);
+
+    Route::get('contact', ['uses' => 'ContactC@showForm', 'as' => 'contact']);
+    Route::post('contact', ['uses' => 'ContactC@sendContactInfo', 'as' => 'contact.post']);
+
 });
 
 

@@ -37,7 +37,7 @@ class InterArbiter extends Command
     public static $exchange_namespace = '\\ccxt\\';
 
     public $exchanges_w_proxy = [
-        'ccex', 'exx', 'ice3x', 'poloniex', 'okex'
+        'ccex', 'exx', 'ice3x', 'poloniex', 'okex', 'coingi'
     ];
 
     /**
