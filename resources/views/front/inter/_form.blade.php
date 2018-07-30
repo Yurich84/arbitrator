@@ -98,47 +98,9 @@
         });
     </script>
 
-    <script>
-        {{--$("#slider").editRangeSlider({--}}
-            {{--bounds: {min: 0, max: 150},--}}
-            {{--defaultValues:{min: {{ $min_profit }}, max: {{ $max_profit }} },--}}
-            {{--step: 0.5,--}}
-            {{--arrows: false,--}}
-            {{--formatter:function(val){--}}
-                {{--var value = Math.round(val * 2) / 2,--}}
-                    {{--decimal = value - Math.round(val);--}}
-                {{--return decimal == 0 ? value.toString() + " %" : value.toString() + " %";--}}
-            {{--},--}}
-            {{--scales: [--}}
-                {{--// Primary scale--}}
-                {{--{--}}
-                    {{--first: function(val){ return val; },--}}
-                    {{--next: function(val){ return val + 10; },--}}
-                    {{--stop: function(val){ return false; },--}}
-                    {{--label: function(val){ return val; },--}}
-                    {{--format: function(tickContainer, tickStart, tickEnd){--}}
-                        {{--tickContainer.addClass("myCustomClass");--}}
-                    {{--}--}}
-                {{--},--}}
-                {{--// Secondary scale--}}
-                {{--{--}}
-                    {{--first: function(val){ return val; },--}}
-                    {{--next: function(val){--}}
-                        {{--if (val % 10 === 9){--}}
-                            {{--return val + 2;--}}
-                        {{--}--}}
-                        {{--return val + 1;--}}
-                    {{--},--}}
-                    {{--stop: function(val){ return false; },--}}
-                    {{--label: function(){ return null; }--}}
-                {{--}]--}}
-        {{--});--}}
-    </script>
 @endpush
 @push('style')
     <link href="{{ asset('/css/bootstrap-multiselect.css') }}" rel="stylesheet" />
     <link href="{{ asset('/css/ion.rangeSlider.css') }}" rel="stylesheet" />
     <link href="{{ asset('/css/ion.rangeSlider.skinModern.css') }}" rel="stylesheet" />
-    {{--<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/flick/jquery-ui.css">--}}
-    {{--<link rel="stylesheet" href="/css/iThing-min.css">--}}
 @endpush

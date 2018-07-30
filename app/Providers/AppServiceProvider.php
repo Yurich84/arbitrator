@@ -13,6 +13,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        // метатеги
+        \View::share('meta',  [
+                'title' => config('app.name'),
+                'desc'  => config('app.name'),
+                'key'   => config('app.name'),
+            ]
+        );
+
         \Blade::if('admin', function () {
             if( $user = \Auth::user() ) {
                 return (bool) $user->admin;

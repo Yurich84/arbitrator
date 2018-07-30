@@ -4,7 +4,8 @@
 
 @section('content')
 
-    <a class="btn btn-primary" href="{{ route('inter.table', ['pair' => $pair, 'up_id' => \App\Models\Update::max('id')]) }}">Table</a>
+    <a class="btn btn-primary" href="{{ route('inter.table', ['pair' => $pair, 'up_id' => \App\Models\Update::max('id')]) }}">
+        Показать таблицу профитности</a>
     <br/><br/>
 
     <div class="row">

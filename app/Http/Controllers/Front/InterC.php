@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Front;
 
+use App\Arbitrator\InterCalculate;
 use App\Http\Controllers\Controller;
 use App\Models\FiatCurency;
 use App\Models\InterPairs;
 use App\Models\Update;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -20,16 +20,24 @@ class InterC extends Controller
      */
     public function current(Request $request)
     {
+
+        // время последнего обновления
+        $last_up = Update::latest('id')
+            ->where('time', '<', Carbon::now()->subMinutes(3))
+            ->first();
+
         if (! $request->isMethod('post') && \Auth::check() && ! is_null(\Auth::user()->filter_pref)) {
-            // если сохранени настройки то подгружаем
+            // если сохранили настройки то подгружаем
             $request->request->add(unserialize(\Auth::user()->filter_pref));
         }
 
         $req = [];
 
+        /**
+         * Поисковые параметры
+         */
         $profit_slider = $req['profit_slider'] = $request->get('profit_slider', '1;50');
         list($min_profit, $max_profit) = explode(';', $profit_slider);
-
         $crypto_curr_only = $req['crypto_curr_only'] = $request->get('crypto_curr_only', 0);
         $min_volume = $req['min_volume'] = $request->get('min_volume', 1);
         $save_filter = $req['save_filter'] = $request->get('save_filter', 0);
@@ -40,10 +48,6 @@ class InterC extends Controller
             $user->filter_pref = serialize($req);
             $user->save();
         }
-
-        $last_up = Update::latest('id')
-            ->where('time', '<', Carbon::now()->subMinutes(3))
-            ->first();
 
         $query = InterPairs::with('stock', 'stock.country')
             ->where('up_id', $last_up->id)
@@ -88,46 +92,7 @@ class InterC extends Controller
         $pairs_grouped = $pairs->groupBy('symbol_id');
 
         // порівнюємо кожну пару на різних біржах
-        $res = [];
-        foreach ($pairs_grouped as $pair_group) {
-            if(count($pair_group) > 2) {
-
-                $pair_group->map(function ($item) {
-                    list($base, $quote) = explode('/', $item->symbol);
-                    $stock_url = $item->stock->trade_url;
-                    $stock_url = str_replace('aa', mb_strtolower($base), $stock_url);
-                    $stock_url = str_replace('bb', mb_strtolower($quote), $stock_url);
-                    $stock_url = str_replace('AA', mb_strtoupper($base), $stock_url);
-                    $stock_url = str_replace('BB', mb_strtoupper($quote), $stock_url);
-
-                    $item->stock_url = $stock_url;
-                });
-
-                $pair_min_price = $pair_group->where('last', $pair_group->min('last'))->first();
-                $pair_max_price = $pair_group->where('last', $pair_group->max('last'))->first();
-
-                //план тут надо у минимального находить цену по которой предлагают а у максимального по которой покупают
-
-                $percent = round(($pair_max_price->last - $pair_min_price->last)/$pair_max_price->last*100, 4); // %
-
-                $res[] = (object) [
-                    'symbol' => $pair_group->first()->symbol,
-                    'stock_min' => $pair_min_price->stock,
-                    'stock_min_url' => $pair_min_price->stock_url,
-                    'stock_min_price' => $pair_min_price->last,
-                    'stock_min_volume' => $pair_min_price->volume,
-                    'stock_max' => $pair_max_price->stock,
-                    'stock_max_url' => $pair_max_price->stock_url,
-                    'stock_max_price' => $pair_max_price->last,
-                    'stock_max_volume' => $pair_max_price->volume,
-                    'comparision' => $pair_group,
-                    'percent' => $percent
-                ];
-
-            } else {
-                continue;
-            }
-        }
+        $res = InterCalculate::findProfitableLast($pairs_grouped);
 
         // фильтр по проценту профита
         $res = collect($res)
@@ -135,7 +100,117 @@ class InterC extends Controller
             ->where('percent', '<', $max_profit)
             ->sortByDesc('percent');
 
+        // метатеги
+        \View::share('meta',  [
+                'title' => config('app.name') . ' - автоматизация заработака на межбиржевом арбитраже',
+                'desc'  => config('app.name') . ' - система поиска внешнебиржевых арбитражных ситуаций, автоматизация заработака на межбиржевом арбитраже',
+                'key'   => config('app.name') . ' - межбиржевой арбитраж, арбитражные вилки',
+            ]
+        );
+
         return view('front.inter.current', compact(
+            'res', 'last_up', 'stocks', 'current_stocks', 'stock_ids', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_volume', 'save_filter'
+        ));
+
+    }
+
+
+    /**
+     * Список текуших вилок
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function arbitrage(Request $request)
+    {
+
+        // время последнего обновления
+        $last_up = Update::latest('id')
+            ->where('time', '<', Carbon::now()->subMinutes(3))
+            ->first();
+
+        if (! $request->isMethod('post') && \Auth::check() && ! is_null(\Auth::user()->filter_pref)) {
+            // если сохранили настройки то подгружаем
+            $request->request->add(unserialize(\Auth::user()->filter_pref));
+        }
+
+        $req = [];
+
+        /**
+         * Поисковые параметры
+         */
+        $profit_slider = $req['profit_slider'] = $request->get('profit_slider', '1;50');
+        list($min_profit, $max_profit) = explode(';', $profit_slider);
+        $crypto_curr_only = $req['crypto_curr_only'] = $request->get('crypto_curr_only', 0);
+        $min_volume = $req['min_volume'] = $request->get('min_volume', 1);
+        $save_filter = $req['save_filter'] = $request->get('save_filter', 0);
+        $stock_ids = $req['stock_ids'] = $request->get('stock_ids', []);
+
+        if($save_filter == 1 && $user = \Auth::user()) {
+            // сохраняем настройки фильтра для пользователя
+            $user->filter_pref = serialize($req);
+            $user->save();
+        }
+
+        $query = InterPairs::with('stock', 'stock.country')
+            ->where('up_id', $last_up->id)
+            ->whereNotNull('symbol_id')
+            ->where('last', '>=', 0)
+            ->where('volume', '>', $min_volume);
+
+        // список бирж участвубщих в поиске
+        $stocks_query = clone $query;
+        $stocks = $stocks_query->groupBy('stock_id')->get();
+        if( empty($stock_ids)) {
+            $stock_ids = $stocks->pluck('stock_id');
+        }
+
+        $query->whereIn('stock_id', $stock_ids);
+
+        $pairs = $query->oldest('symbol')->get();
+
+        // без фиатних валют
+        if($crypto_curr_only) {
+            $fiat = FiatCurency::all()->pluck('id')->toArray();
+            $fiat[] = 'USDT';
+            $fiat[] = 'TUSD';
+
+            $pairs = $pairs->reject(function ($item) use ($fiat) {
+                list($base, $quote) = explode('/', $item->symbol);
+                return in_array($base, $fiat) || in_array($quote, $fiat);
+            });
+        }
+
+        // Список бирж
+        $current_stocks = $pairs->groupBy('stock_id')->map(function ($val) {
+            return $item = (object) [
+                'name' => $val->first()->stock->name,
+                'logo' => $val->first()->stock->logo,
+                'cap'  => $val->first()->stock->volume_btc,
+                'flag' => $val->first()->stock->country->flag,
+            ];
+        });
+
+        // групировка по торговим парам
+        $pairs_grouped = $pairs->groupBy('symbol_id');
+
+        // порівнюємо кожну пару на різних біржах
+        $res = InterCalculate::findProfitable($pairs_grouped);
+
+        // фильтр по проценту профита
+        $res = collect($res)
+            ->where('percent', '>', $min_profit)
+            ->where('percent', '<', $max_profit)
+            ->sortByDesc('percent');
+
+        // метатеги
+        \View::share('meta',  [
+                'title' => config('app.name') . ' - автоматизация заработака на межбиржевом арбитраже',
+                'desc'  => config('app.name') . ' - система поиска внешнебиржевых арбитражных ситуаций, автоматизация заработака на межбиржевом арбитраже',
+                'key'   => config('app.name') . ' - межбиржевой арбитраж, арбитражные вилки',
+            ]
+        );
+
+        return view('front.inter.arbitrage', compact(
             'res', 'last_up', 'stocks', 'current_stocks', 'stock_ids', 'min_profit', 'max_profit', 'crypto_curr_only', 'min_volume', 'save_filter'
         ));
 

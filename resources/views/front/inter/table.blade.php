@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <a class="btn btn-primary" href="{{ route('inter.history', ['pair' => $pair]) }}">Table</a>
+    <a class="btn btn-primary" href="{{ route('inter.history', ['pair' => $pair]) }}">Показать динамику цен</a>
     <br/><br/>
 
     <div class="row">

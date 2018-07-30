@@ -43,8 +43,12 @@ Route::group(['namespace' => 'Front'], function () {
      *    Внешнебиржевой арбитраж
      * -----------------------------
      */
-    Route::get('/', ['uses' => 'InterC@current', 'as' => 'inter.current']);
-    Route::post('/', ['uses' => 'InterC@current', 'as' => 'inter.current_post']);
+
+    Route::get('/', ['uses' => 'InterC@arbitrage', 'as' => 'inter.arbitrage']);
+    Route::post('/', ['uses' => 'InterC@arbitrage', 'as' => 'inter.arbitrage_post']);
+
+    Route::get('current', ['uses' => 'InterC@current', 'as' => 'inter.current']);
+    Route::post('current', ['uses' => 'InterC@current', 'as' => 'inter.current_post']);
 
     Route::get('inter/table/{up_id}/{pair}', ['uses' => 'InterC@show', 'as' => 'inter.table']);
     Route::get('inter/history/{pair}', ['uses' => 'InterC@history', 'as' => 'inter.history']);

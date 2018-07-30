@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Арбитратор</title>
+	<title>{{ $meta['title'] }}</title>
 
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     {{--<link href="{{ asset('css/fontawesome-all.min.css') }}" rel="stylesheet">--}}
@@ -20,7 +20,7 @@
     @include('front.header')
 
     <!--Main layout-->
-    <main style="margin-top: 70px;">
+    <main style="margin-top: 90px;">
 
         <div class="container">
 

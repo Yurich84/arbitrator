@@ -4,12 +4,18 @@
         max-width: 1500px;
     }
 }
-
+h1, h2, h3, h4, .title a{
+    font-family: Roboto, sans-serif;
+    font-weight: 300;
+    color:#58595B;
+    display:block;
+    letter-spacing:0;
+}
 h2 {
     font-weight: inherit;
 }
 
-.app-header {
+.app-header, .navbar {
     margin-bottom: 0;
     background-color: #2d2d30;
     opacity: 0.9;

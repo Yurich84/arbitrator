@@ -68,7 +68,7 @@
                                         </a>
                                     </div>
                                     <div class="float-left p-2" style="line-height: 13px;">
-                                        Price: {{ rtrim(number_format($item->stock_min_price, 10), 0) }}
+                                        Ask: {{ rtrim(number_format($item->stock_min_ask, 10), 0) }}
                                         <br/><span class="small">Vol: {{ $item->stock_min_volume }} {{ explode('/', $item->symbol)[1] }}</span>
                                     </div>
                                     <div class="float-right text-center w-25 p-1">
@@ -90,7 +90,7 @@
 
                                     </div>
                                     <div class="float-left p-2" style="line-height: 13px;">
-                                        Price: {{ rtrim(number_format($item->stock_max_price, 10), 0) }}
+                                        Bid: {{ rtrim(number_format($item->stock_max_bid, 10), 0) }}
                                         <br/><span class="small">Vol: {{ $item->stock_max_volume }} {{ explode('/', $item->symbol)[1] }}</span>
                                     </div>
                                 </td>
@@ -106,7 +106,8 @@
                                         @foreach($item->comparision->sortBy('last') as $item_gr)
                                             <tr>
                                                 <td><a href="{{ $item_gr->stock_url }}" target="_blank">{{ $item_gr->stock->name }}</a></td>
-                                                <td>Price: {{ rtrim(number_format($item_gr->last, 10), 0) }}</td>
+                                                <td>Ask: {{ rtrim(number_format($item_gr->ask, 10), 0) }}</td>
+                                                <td>Bid: {{ rtrim(number_format($item_gr->bid, 10), 0) }}</td>
                                                 <td><span class="small">Vol: {{ $item_gr->volume }} {{ explode('/', $item_gr->symbol)[1] }}</span></td>
                                             </tr>
                                         @endforeach
